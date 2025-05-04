@@ -1,0 +1,1004 @@
+/* Review.css */
+.review-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f7f9fc;
+  min-height: calc(100vh - 80px);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.review-header h2 {
+  margin: 0;
+  margin-left: 16px;
+  color: #2c3e50;
+  font-size: 1.8rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid #dce1e8;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #4a5568;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #f1f5f9;
+  color: #2d3748;
+}
+
+.back-button svg {
+  margin-right: 8px;
+}
+
+.review-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  height: calc(100vh - 160px);
+}
+
+/* Page Preview Panel */
+.page-preview-panel {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.preview-header h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.2rem;
+}
+
+.download-link {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #3182ce;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.download-link:hover {
+  background-color: #ebf8ff;
+}
+
+.download-link svg {
+  margin-right: 6px;
+}
+
+.preview-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
+.pdf-viewer,
+.page-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+}
+
+/* Page Details Panel */
+.page-details-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.details-card,
+.actions-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.details-card h3,
+.actions-card h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #2d3748;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #edf2f7;
+  padding-bottom: 12px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 15px;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+/* Status colors */
+.status-review {
+  color: #dd6b20;
+  background-color: #fffaf0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.status-accepted {
+  color: #38a169;
+  background-color: #f0fff4;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.status-rejected {
+  color: #e53e3e;
+  background-color: #fff5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Action section */
+.action-description {
+  color: #718096;
+  margin-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.approve-button,
+.reject-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.approve-button {
+  background-color: #38a169;
+  color: white;
+}
+
+.approve-button:hover {
+  background-color: #2f855a;
+}
+
+.approve-button:disabled {
+  background-color: #9ae6b4;
+  cursor: not-allowed;
+}
+
+.reject-button {
+  background-color: #e53e3e;
+  color: white;
+}
+
+.reject-button:hover {
+  background-color: #c53030;
+}
+
+.reject-button:disabled {
+  background-color: #feb2b2;
+  cursor: not-allowed;
+}
+
+.approve-button svg,
+.reject-button svg {
+  margin-right: 8px;
+}
+
+/* Loading and error states */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #3182ce;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.spinner-small {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #ffffff;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  text-align: center;
+  max-width: 500px;
+  margin: 60px auto;
+}
+
+.error-message h3 {
+  color: #e53e3e;
+  margin-top: 0;
+}
+
+.error-message p {
+  color: #4a5568;
+  margin-bottom: 24px;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+  background-color: #3182ce;
+}
+
+.primary-button svg {
+  margin-right: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .review-content {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .page-preview-panel {
+    height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .review-header h2 {
+    margin-left: 0;
+    margin-top: 16px;
+  }
+
+  .page-preview-panel {
+    height: 400px;
+  }
+}
+
+/* Add these styles to your Review.css file */
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.copy-button {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.copy-button:hover {
+  background-color: #e5e7eb;
+}
+
+.view-button {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
+}
+
+.view-button:hover {
+  background-color: #dbeafe;
+}
+
+.download-button {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #dcfce7;
+}
+
+.download-button:hover {
+  background-color: #dcfce7;
+}
+
+/* For the entire preview panel */
+.page-preview-panel {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.preview-container {
+  border-top: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  height: 600px;
+  /* Default height for larger screens */
+}
+
+/* PDF viewer styling */
+.pdf-viewer {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: #f9fafb;
+}
+
+/* PDF fallback for unsupported browsers */
+.pdf-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  background-color: #f9fafb;
+}
+
+.fallback-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Status styles enhancement */
+.status-pending {
+  color: #9d5900;
+  background-color: #fef3c7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.status-accepted {
+  color: #166534;
+  background-color: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.status-rejected {
+  color: #991b1b;
+  background-color: #fee2e2;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* Enhance buttons */
+.approve-button,
+.reject-button {
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: transform 0.1s ease;
+}
+
+.approve-button:active,
+.reject-button:active {
+  transform: scale(0.98);
+}
+
+/* Loading spinner enhancements */
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .review-content {
+    flex-direction: column;
+  }
+
+  .preview-container {
+    height: 450px;
+    /* Adjusted height for tablets */
+  }
+
+  .preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .preview-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .preview-container {
+    height: 400px;
+    /* Adjusted height for mobile phones */
+  }
+
+  .action-button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .preview-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .page-preview-panel,
+  .page-details-panel {
+    border-radius: 6px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .approve-button,
+  .reject-button {
+    width: 100%;
+  }
+}
+
+/* Add these styles to your existing Review.css file */
+
+/* Related Pages Status Card */
+.related-pages-card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.related-pages-card h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.related-pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.related-page-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.related-page-number {
+  font-weight: 500;
+}
+
+.related-page-status {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-accepted {
+  color: #28a745;
+}
+
+.status-rejected {
+  color: #dc3545;
+}
+
+.status-review {
+  color: #ffc107;
+}
+
+.status-unknown {
+  color: #6c757d;
+}
+
+.group-status {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #e9ecef;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.group-status-label {
+  font-weight: 600;
+}
+
+.group-status-value {
+  font-weight: 600;
+}
+
+.status-complete {
+  color: #28a745;
+}
+
+.status-incomplete {
+  color: #ffc107;
+}
+
+.group-notice {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #d4edda;
+  border-left: 4px solid #28a745;
+  color: #155724;
+  font-weight: 500;
+  border-radius: 4px;
+}
+/* Add these styles to your existing Review.css file */
+
+/* Resend button styles */
+.resend-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #4c6ef5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.resend-button:hover {
+  background-color: #3b5bdb;
+}
+
+.resend-button:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* Status message styles */
+.status-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.approved-message {
+  background-color: #d3f9d8;
+  border-left: 4px solid #37b24d;
+  color: #2b8a3e;
+}
+
+.rejected-message {
+  background-color: #ffe3e3;
+  border-left: 4px solid #f03e3e;
+  color: #c92a2a;
+}
+
+.related-page-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #e9ecef;
+}
+
+.related-page-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.related-page-number {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.view-related-page-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: #f1f3f5;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  color: #495057;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-related-page-button:hover {
+  background-color: #e9ecef;
+  color: #212529;
+  border-color: #ced4da;
+}
+
+.view-related-page-button:active {
+  background-color: #dee2e6;
+  transform: translateY(1px);
+}
+
+/* Status colors */
+.status-accepted {
+  color: #2b8a3e;
+  font-weight: 500;
+}
+
+.status-pending {
+  color: #e67700;
+  font-weight: 500;
+}
+
+.status-rejected {
+  color: #c92a2a;
+  font-weight: 500;
+}
+
+.status-unknown {
+  color: #868e96;
+  font-style: italic;
+}
+
+.status-complete {
+  color: #2b8a3e;
+  font-weight: 600;
+}
+
+.status-incomplete {
+  color: #e67700;
+  font-weight: 600;
+}
+
+.group-status {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.group-notice {
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #e7f5ff;
+  border-left: 4px solid #339af0;
+  border-radius: 4px;
+  color: #1864ab;
+  font-size: 0.9rem;
+}/* Add these styles to your existing Review.css file */
+
+.related-page-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #e9ecef;
+}
+
+.related-page-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.related-page-number {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.view-related-page-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: #f1f3f5;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  color: #495057;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-related-page-button:hover {
+  background-color: #e9ecef;
+  color: #212529;
+  border-color: #ced4da;
+}
+
+.view-related-page-button:active {
+  background-color: #dee2e6;
+  transform: translateY(1px);
+}
+
+/* Related pages header with Approve All button */
+.related-pages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.approve-all-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #2b8a3e;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.approve-all-button:hover {
+  background-color: #2f9e44;
+}
+
+.approve-all-button:active {
+  transform: translateY(1px);
+}
+
+.approve-all-button:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* Status colors */
+.status-accepted {
+  color: #2b8a3e;
+  font-weight: 500;
+}
+
+.status-pending {
+  color: #e67700;
+  font-weight: 500;
+}
+
+.status-rejected {
+  color: #c92a2a;
+  font-weight: 500;
+}
+
+.status-unknown {
+  color: #868e96;
+  font-style: italic;
+}
+
+.status-complete {
+  color: #2b8a3e;
+  font-weight: 600;
+}
+
+.status-incomplete {
+  color: #e67700;
+  font-weight: 600;
+}
+
+.group-status {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.group-notice {
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #e7f5ff;
+  border-left: 4px solid #339af0;
+  border-radius: 4px;
+  color: #1864ab;
+  font-size: 0.9rem;
+}
+
+/* Approve/Reject buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.reject-button, .approve-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+}
+
+.reject-button {
+  background-color: #fff;
+  color: #e03131;
+  border: 1px solid #e03131;
+}
+
+.reject-button:hover:not(:disabled) {
+  background-color: #fff5f5;
+}
+
+.approve-button {
+  background-color: #2b8a3e;
+  color: white;
+  border: none;
+}
+
+.approve-button:hover:not(:disabled) {
+  background-color: #2f9e44;
+}
+
+.reject-button:disabled, .approve-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner for loading states */
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

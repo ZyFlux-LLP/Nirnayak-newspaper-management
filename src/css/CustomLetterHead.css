@@ -1,0 +1,533 @@
+/* Import Hindi fonts with proper font display */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans:wght@400;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.receiver-textarea, .receiver-textarea1 {
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical; /* or 'none' if you want to disable resizing */
+}
+
+:root {
+  --primary-color: #1a3a6e;
+  --accent-color: #d4a237;
+  --text-color: #333;
+  --text-muted: #666;
+  --bg-color: #f5f5f5;
+  --bg-container: #fff;
+  --border-color: #e0e0e0;
+  --control-border: #d1d9e6;
+  --focus-color: #4a7acd;
+  --success-color: #2e7d32;
+  --border-radius: 8px;
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
+  --shadow-focus: 0 0 0 2px rgba(74, 122, 205, 0.2);
+}
+
+body {
+  font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  font-size: 16px;
+}
+
+/* Container Styles */
+.letterhead-notepad-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.letterhead-notepad-container h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.5px;
+}
+
+/* Control Panel Styles - Improved spacing and visual hierarchy */
+.letterhead-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 2.5rem;
+  background-color: #f0f7ff;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(26, 58, 110, 0.1);
+}
+
+.control-group {
+  flex: 1;
+  min-width: 280px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  font-size: 15px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Adds spacing between label and input */
+  margin-bottom: 10px;
+}
+
+.control-group label {
+  width: 150px; /* Set equal width for labels */
+  text-align: left; /* Ensures proper alignment */
+  font-weight: 600;
+}
+
+.control-group input,
+.control-group select {
+  flex-grow: 1; /* Makes input/select take remaining space */
+  padding: 5px;
+  font-size: 14px;
+}
+
+.control-group input,
+.control-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--control-border);
+  border-radius: 5px;
+  font-size: 16px;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.control-group input:focus,
+.control-group select:focus {
+  outline: none;
+  border-color: var(--focus-color);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Letterhead Preview Container - Improved proportions for A4 */
+.letterhead-preview-container {
+  background-color: var(--bg-container);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Fixed A4 dimensions regardless of device */
+.letterhead-preview {
+  width: 210mm; /* Fixed A4 width */
+  min-height: 297mm; /* Fixed A4 height */
+  max-width: 100%; /* Responsive for display only */
+  margin: 0 auto;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  padding: 40px 50px;
+  position: relative;
+  overflow: hidden; /* Prevent content overflow */
+}
+
+/* Letterhead Header Styles - Improved spacing */
+.letterhead-header {
+  margin-bottom: 40px;
+}
+
+.letterhead-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.letterhead-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.letterhead-tagline {
+  margin-bottom: 14px;
+  color: var(--primary-color);
+}
+
+.letterhead-tagline p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.letterhead-logo img {
+  width: 430px;
+  height: 120px;
+  margin-left: -20px;
+  object-fit: fill; /* This will stretch the image */
+}
+
+.letterhead-address {
+  flex: 0 0 justify; /* Keeps right side fixed */
+  font-size: 14px;
+  color: #d40000;
+  font-weight: bold;
+}
+
+.letterhead-address p {
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.letterhead-divider {
+  height: 3px;
+  background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+  border-radius: 2px;
+}
+
+/* Content Styles - Improved spacing and typography */
+.letterhead-content {
+  min-height: 650px; /* Increased for better content space */
+  display: flex;
+  flex-direction: column;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.reference, .date {
+  font-size: 15px;
+  color: var(--primary-color);
+}
+
+.receiver-address p {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* Updated Signature Section with reduced gap */
+.signature-section {
+  align-self: flex-start;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  text-align: left;
+  width: 100%;
+}
+
+.signature-label {
+  margin-bottom: 20px !important; /* Reduced from 60px to 20px */
+  font-weight: normal;
+  color: var(--text-muted);
+}
+
+.signature-name {
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+/* Action Buttons - More professional styling */
+.letterhead-actions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.letterhead-actions button {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.save-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.export-btn {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #12295a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.export-btn:hover {
+  background-color: #c08e20;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.save-btn:active,
+.export-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.save-btn:disabled,
+.export-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Saved Message Notification - Improved styling */
+.saved-message {
+  text-align: center;
+  padding: 14px;
+  background-color: #e6f7e6;
+  border-left: 4px solid #4caf50;
+  margin-top: 20px;
+  color: var(--success-color);
+  border-radius: 4px;
+  animation: fadeIn 0.3s ease-in-out;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Print styles for proper export */
+@media print {
+  body, html {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+  
+  .letterhead-notepad-container {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .letterhead-controls,
+  .letterhead-actions,
+  .letterhead-notepad-container h1,
+  .letterhead-editor {
+    display: none;
+  }
+  
+  .letterhead-preview-container {
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .letterhead-preview {
+    border: none;
+    box-shadow: none;
+    width: 210mm !important; /* Force A4 width */
+    height: 297mm !important; /* Force A4 height */
+    max-width: none;
+    padding: 20mm;
+  }
+}
+
+/* Document content styles */
+.document-content-preview {
+  width: 100%;
+  text-align: left;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  padding: 10px 0;
+  min-height: 300px; /* Ensure minimum height for content area */
+}
+
+.document-content-preview p {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  font-size: 14px;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+}
+
+.letterhead-editor {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.letterhead-editor textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 10px;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.content-paragraph {
+  text-align: left;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+}
+
+/* Subject line formatting */
+.subject-line {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.subject-label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.subject-content {
+  word-wrap: break-word;
+  word-break: break-word;
+  display: inline;
+  max-width: 90%;
+  text-align: left;
+}
+
+/* Responsive adjustments but maintaining A4 ratio for PDF export */
+@media screen and (max-width: 992px) {
+  .letterhead-preview-container {
+    overflow-x: auto;
+  }
+  
+  .letterhead-preview {
+    /* For display only - keep fixed size for export */
+    max-width: 100%;
+    transform-origin: top left;
+    margin: 0 auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .letterhead-notepad-container {
+    padding: 1rem;
+  }
+  
+  .letterhead-controls {
+    padding: 1rem;
+  }
+  
+  .control-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .control-group label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  
+  .letterhead-top {
+    flex-direction: column;
+  }
+  
+  .letterhead-address {
+    margin-top: 20px;
+  }
+  
+  /* For display only - preserve dimensions for export */
+  .letterhead-preview-container {
+    padding: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .letterhead-actions {
+    flex-direction: column;
+  }
+  
+  .letterhead-actions button {
+    width: 100%;
+  }
+}
+/* Add these styles to your CustomLetterHead.css file */
+
+/* Fix font size consistency */
+.fixed-font-size {
+  -webkit-text-size-adjust: 100%; /* Prevent iOS from auto-adjusting text size */
+  text-size-adjust: 100%; /* Standard property for other browsers */
+  font-size: 14px !important; /* Force consistent font size */
+}
+
+/* Ensure all paragraphs in the preview have consistent font size */
+.letterhead-preview p,
+.letterhead-preview .document-content-preview p,
+.letterhead-preview .content-paragraph,
+.letterhead-preview .subject-line,
+.letterhead-preview .subject-content,
+.letterhead-preview .signature-section,
+.letterhead-preview .signature-name {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* Prevent text scaling on mobile when in landscape mode */
+@media screen and (max-width: 1024px) {
+  .letterhead-preview {
+    font-size: 14px !important;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .document-content-preview {
+    font-size: 14px !important;
+    max-height: none !important; /* Remove any max-height constraints */
+    overflow: visible !important; /* Ensure content doesn't get cut off */
+  }
+  
+  /* Force consistent font size for long content */
+  .content-paragraph {
+    font-size: 14px !important;
+  }
+}
+
+/* Override any viewport meta settings that might be causing the issue */
+@viewport {
+  zoom: 1.0;
+  width: device-width;
+}
+
+/* Additional fixes for specific mobile browsers */
+html {
+  -webkit-text-size-adjust: 100%; /* Prevent text size adjust after orientation change without disabling user zoom */
+  text-size-adjust: 100%;
+}

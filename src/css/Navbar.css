@@ -1,0 +1,318 @@
+/* Professional Navbar Styling with Refined Color Scheme */
+:root {
+  --primary-dark: #1e293b;       /* Slate dark blue */
+  --primary-main: #334155;       /* Slate blue */
+  --primary-light: #475569;      /* Lighter slate */
+  --accent: #0ea5e9;             /* Sky blue accent */
+  --accent-light: #38bdf8;       /* Lighter sky blue */
+  --text-primary: #ffffff;       /* White text */
+  --text-secondary: rgba(255, 255, 255, 0.85);  /* Slightly muted white */
+  --shadow-light: 0 2px 10px rgba(15, 23, 42, 0.15);
+  --shadow-medium: 0 4px 15px rgba(15, 23, 42, 0.2);
+  --transition-speed: 0.25s;
+}
+
+/* Base navbar styling */
+.navbar {
+  background-color: var(--primary-dark);
+  color: var(--text-primary);
+  padding: 0;
+  box-shadow: var(--shadow-medium);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  max-width: 1300px;
+  margin: 0 auto;
+  height: 70px;
+  position: relative;
+}
+
+/* Logo styling */
+.logo {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all var(--transition-speed) ease;
+  z-index: 1001;
+  padding: 8px 0;
+}
+
+.logo:hover {
+  color: var(--accent-light);
+}
+
+/* Navigation links container */
+.nav-links {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Individual navigation links */
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-right: 25px;
+  padding: 8px 12px;
+  border-radius: 3px;
+  transition: all var(--transition-speed) ease;
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent);
+  transition: all var(--transition-speed) ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Active link styling */
+.nav-link.active {
+  color: var(--text-primary);
+}
+
+.nav-link.active::after {
+  width: 100%;
+  height: 2px;
+  background-color: var(--accent);
+}
+
+/* User section styling */
+.nav-user {
+  display: flex;
+  align-items: center;
+}
+
+/* Logout button styling */
+.logout-button {
+  background-color: var(--accent);
+  border: none;
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  font-weight: 500;
+  outline: none;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.3px;
+}
+
+.logout-button:hover {
+  background-color: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(14, 165, 233, 0.3);
+}
+
+.logout-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(14, 165, 233, 0.3);
+}
+
+.logout-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.logout-text {
+  font-weight: 500;
+}
+
+/* Mobile menu button - HIDDEN BY DEFAULT */
+.mobile-menu-button {
+  display: none; /* Hidden by default */
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1001;
+  transition: all var(--transition-speed) ease;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .navbar-container {
+    height: 60px;
+  }
+  
+  .mobile-menu-button {
+    display: flex; /* Only displayed in mobile view */
+  }
+  
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background-color: var(--primary-main);
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease-out, padding 0.3s ease-out;
+    box-shadow: var(--shadow-medium);
+    padding: 0;
+  }
+  
+  .nav-links.open {
+    height: auto;
+    min-height: 210px;
+    padding: 15px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nav-link {
+    margin: 0;
+    padding: 14px 24px;
+    width: 100%;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  .nav-link:hover {
+    border-left-color: var(--accent);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .nav-link::after {
+    display: none;
+  }
+  
+  .nav-link.active {
+    border-left: 3px solid var(--accent);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .nav-user {
+    width: 100%;
+    padding: 15px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 8px;
+  }
+  
+  .logout-button {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+}
+
+/* For smaller mobile devices */
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0 16px;
+  }
+  
+  .logo {
+    font-size: 18px;
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Add subtle animation for page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-links > * {
+  animation: fadeIn 0.3s ease-out forwards;
+}/* Add these styles to your existing CSS file for the hamburger icon */
+
+/* Hamburger Menu Styles */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  position: relative;
+}
+
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Animation for hamburger to X when menu is open */
+.hamburger.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Make sure mobile menu button is properly displayed */
+.mobile-menu-button {
+  display: none;  /* Hidden by default */
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1001;
+  transition: all var(--transition-speed) ease;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Show the mobile menu button only on smaller screens */
+@media (max-width: 768px) {
+  .mobile-menu-button {
+    display: flex;  /* Show on mobile */
+  }
+}

@@ -1,0 +1,706 @@
+.invoice-header-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.newspaper-logo {
+  display: flex;
+  flex-direction: column;
+  width: 0%;
+  min-width: 300px;
+}
+
+.newspaper-logo img {
+  width: 100%;
+}
+
+.contact-info {
+  width: 25%;
+  min-width: 200px;
+  text-align: right;
+  font-size: 12px;
+}
+
+
+.contact-info p {
+  margin: 2px 0;
+}
+
+.address-section {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+}
+
+.office-addresses {
+  width: 75%;
+  min-width: 300px;
+  font-size: 12px;
+}
+
+.dpr-code-section {
+  width: 25%;
+  min-width: 200px;
+  text-align: right;
+}
+
+.dpr-code {
+  background-color: #f0f0f0;
+  padding: 8px;
+  display: inline-block;
+  font-weight: bold;
+}
+.particulars-section {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.particulars-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.particulars-column {
+  flex: 1 1 50%;
+  min-width: 250px;
+}
+
+.particulars-column p {
+  margin: 2px 0;
+}
+
+.additional-info {
+  margin-top: 10px;
+}
+
+.additional-info-content {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.invoice-table {
+  margin-top: 15px;
+  overflow-x: auto;
+}
+
+.invoice-table-content {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #000;
+  min-width: 650px;
+}
+
+.invoice-table-header th {
+  border: 1px solid #000;
+  padding: 5px;
+}
+
+.invoice-table-row td {
+  border: 1px solid #000;
+  padding: 5px;
+}
+
+.invoice-table-row-center {
+  text-align: center;
+}
+
+.invoice-table-row-right {
+  text-align: right;
+}
+
+.invoice-footer {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.invoice-footer-signature {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 30px;
+  gap: 20px;
+}
+
+.signature-column {
+  flex: 1 1 150px;
+  min-width: 120px;
+}
+
+.signature-line {
+  margin-top: 50px;
+  border-top: 1px solid #000;
+  width: 100%;
+  max-width: 150px;
+}
+
+.signature-line p {
+  text-align: center;
+  margin: 5px 0;
+}
+
+.invoice-notes {
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.invoice-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.invoice-download-btn {
+  padding: 8px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.invoice-download-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+/* Reset and base styles */
+.invoice-container {
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.invoice-preview {
+  border: 1px solid #000;
+  padding: 15px;
+  background: white;
+}
+
+/* Header styles */
+.invoice-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 10px;
+}
+
+
+.contact-info {
+  width: 40%;
+  text-align: right;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.address-section {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.office-addresses {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dpr-code {
+  background: #f0f0f0;
+  padding: 5px 10px;
+  font-weight: bold;
+}
+
+/* Bill details section */
+.bill-details {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.bill-details div {
+  display: flex;
+  gap: 10px;
+}
+
+/* Table styles */
+.invoice-table {
+  margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th,
+.invoice-table td {
+  border: 1px solid #000;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.invoice-table th {
+  background: #f5f5f5;
+  font-weight: bold;
+}
+
+.invoice-table td {
+  text-align: center;
+}
+
+.invoice-table td[colspan] {
+  text-align: left;
+}
+
+.amount-column {
+  text-align: right !important;
+}
+
+/* Footer styles */
+.invoice-footer {
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.amount-words {
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.bank-details {
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #000;
+}
+
+.footer-notes {
+  margin-top: 20px;
+  font-size: 11px;
+}
+
+.footer-notes p {
+  margin: 5px 0;
+}
+
+/* Action buttons */
+.invoice-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.invoice-download-btn {
+  padding: 10px 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.invoice-download-btn:disabled {
+  background: #cccccc;
+}
+
+/* Additional styles for the table */
+.particulars-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.table-total-row td {
+  font-weight: bold;
+}
+
+.table-calculation-row td {
+  border: 1px solid #000;
+}.invoice-container {
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.invoice-preview {
+  padding: 20px;
+  background: white;
+}
+
+/* Header Logo and Contact */
+.invoice-header-content {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 15px;
+}
+
+.newspaper-logo {
+  width: 70%;
+}
+
+
+.contact-info {
+  width: 30%;
+  text-align: right;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.contact-info p {
+  margin: 0;
+}
+
+/* Address Section */
+.address-section {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  
+  margin-bottom: 15px;
+}
+
+.office-addresses {
+  width: 70%;
+  min-width: 250px;
+  font-size: 11px;
+  line-height: 1.4;
+  padding-right: 10px;
+}
+
+.office-addresses p {
+  margin: 2px 0;
+}
+
+.dpr-code-section {
+  width: 25%;
+  min-width: 150px;
+  padding-left: 10px;
+}
+
+.dpr-code {
+  background-color: #f0f0f0;
+  padding: 8px;
+  display: inline-block;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+/* Bill Details */
+.bill-info {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-size: 11px;
+  gap: 8px;
+}
+
+.bill-info-item {
+  display: flex;
+  gap: 10px;
+}
+
+.bill-info-label {
+  min-width: 80px;
+}
+
+/* Table Styles */
+.invoice-table {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.invoice-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th, 
+.invoice-table td {
+  border: 1px solid #000;
+  padding: 5px;
+  font-size: 13px;
+}
+
+.invoice-table th {
+  background: #fff;
+  font-weight: normal;
+  text-align: center;
+}
+
+.invoice-table td {
+  text-align: left;
+}
+
+.amount-column {
+  text-align: right !important;
+}
+
+.center-align {
+  text-align: center !important;
+}
+
+/* Bank Details */
+.bank-details {
+  margin-top: 15px;
+  font-size: 11px;
+}
+
+.bank-details p {
+  margin: 3px 0;
+}
+
+/* Amount in Words */
+.amount-words {
+  margin: 15px 0;
+  font-size: 11px;
+}
+
+/* Footer Notes */
+.invoice-notes {
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.invoice-notes p {
+  margin: 3px 0;
+}
+
+/* DPR Code Box */
+.dpr-code-box {
+  border: 1px solid #000;
+  padding: 3px 8px;
+  display: inline-block;
+  margin-top: 15px;
+  font-size: 11px;
+}
+
+/* Table Specific Styles */
+.no-border-right {
+  border-right: none !important;
+}
+
+.no-border-left {
+  border-left: none !important;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.table-total td {
+  font-weight: bold;
+}
+
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 5px;
+}
+
+.logo-section {
+  width: 70%;
+}
+
+.newspaper-logo {
+  width: 65%;
+  mix-blend-mode: multiply;
+  background: none;
+  margin-top: -25px;
+  margin-bottom: -35px;
+}
+
+
+.contact-info {
+  width: 30%;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.contact-info p {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.contact-info .label {
+  display: inline-block;
+  width: 60px;
+}
+
+.address-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.addresses {
+  width: 70%;
+}
+
+.addresses p {
+  margin: 2px 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.dpr-code-box {
+  width: 30%;
+  background-color: #f0f0f0;
+  padding: 8px 15px;
+  text-align: left;
+
+}
+
+.dpr-code-box p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: bold;
+}
+.custom-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.custom-table td {
+  border-left: 2px solid black;  /* Left border */
+  border-right: 2px solid black; /* Right border */
+  padding: 8px;
+}
+
+.custom-table tr:not(:last-child) td {
+  border-bottom: 1px solid black; /* Border only between rows */
+}
+/* Add these styles to your invoice.css file */
+
+.dpr-code-box {
+  border: 1px solid #000 !important;
+  padding: 10px !important;
+  margin-top: 20px !important;
+  display: inline-block !important;
+  background-color: #f9f9f9;
+  width: auto !important;
+}
+
+.dpr-code-box p {
+  margin: 5px 0 !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: #000 !important;
+}
+
+/* Improve table styles */
+.invoice-table table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* Style for the first column without horizontal borders */
+.invoice-table td:first-child {
+  vertical-align: top;
+  background-color: #f9f9f9;
+}
+
+/* Ensure the invoice preview has enough space */
+.invoice-preview {
+  padding: 20px;
+  margin-bottom: 30px;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  min-height: 800px;
+}
+
+/* Make sure the PDF export captures everything */
+@media print {
+  .dpr-code-box {
+    display: block !important;
+    page-break-inside: avoid;
+    margin-top: 20px !important;
+  }
+  
+  .invoice-preview {
+    width: 100% !important;
+    height: 842px !important;
+    padding: 20px !important;
+  }
+}
+/* Add these styles to your existing CSS */
+.invoice-table table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+/* Style for the first column (moved from last position) */
+.particulars-note-column {
+  width: 25%;
+  border-right: 1px solid #000;
+  border-left: 1px solid #000;
+  border-top: 1px solid #000;
+  border-bottom: none !important;
+  vertical-align: top;
+  padding: 5px;
+}
+
+/* Remove horizontal lines between cells in this column */
+.particulars-note-column-cell {
+  border-bottom: none !important;
+  border-top: none !important;
+  padding: 5px;
+}
+
+/* Make DPR Code box more visible */
+.dpr-code-box {
+  border: 2px solid #000;
+  padding: 8px;
+  margin-top: 15px;
+  display: block;
+  background-color: #f9f9f9;
+  width: auto;
+  text-align: left;
+}
+
+.dpr-code-box p {
+  margin: 2px 0;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Set A4 dimensions for preview */
+.invoice-preview {
+  border: 1px solid #000;
+  padding: 10px;
+  background: white;
+  overflow-x: hidden;
+  width: 100%;
+  /* A4 is 210mm x 297mm, but we account for padding and scaling */
+  min-height: 100vh; /* Mobile view - full viewport height */
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .invoice-preview {
+    padding: 20px;
+    height: 297mm; /* A4 height */
+    min-height: 1123px; /* 297mm in pixels */
+    max-width: 210mm; /* A4 width */
+    margin: 0 auto;
+  }
+}
+
+

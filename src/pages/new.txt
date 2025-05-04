@@ -1,0 +1,22 @@
+  const [showEditForm, setShowEditForm] = useState(false);
+  const deleteClient = async (clientId, clientName) => {
+    // Show confirmation dialog
+    if (window.confirm(`Do you want to delete the client "${clientName}"?`)) {
+      try {
+        setError(null);
+        const clientRef = doc(db, "clients", clientId);
+        
+        // Delete Client from Firestore
+        await deleteDoc(clientRef);
+        
+        console.log("Client deleted with ID:", clientId);
+        
+        // Refresh client list
+        fetchClients();
+      } catch (error) {
+        console.error("Error deleting client:", error);
+        setError("Failed to delete client. Please try again.");
+      }
+    }
+  };
+  <button className="btn-delete" onClick={() => deleteClient(client.id, client.name)}>Remove</button>

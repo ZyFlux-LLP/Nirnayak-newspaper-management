@@ -1,0 +1,278 @@
+/* Main container styling */
+.gst-records-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.btn-download, .btn-email, .btn-save {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-download {
+  background-color: #4a90e2;
+  color: white;
+}
+/* Page title */
+.gst-records-container h1 {
+  color: #2c3e50;
+  font-size: 28px;
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3498db;
+}
+
+/* Filter section */
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+.filter-group select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-group select:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Client records section */
+.records-section {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.client-records {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.client-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #f1f8fe;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.client-name {
+  font-size: 20px;
+  margin: 0;
+  color: #2c3e50;
+}
+
+.client-overall-gst {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.client-records > span {
+  display: block;
+  padding: 10px 20px;
+  font-weight: 500;
+}
+
+.client-records .value {
+  color: #2980b9;
+  font-weight: 600;
+}
+
+/* Table styling */
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.records-table th,
+.records-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.records-table th {
+  background-color: #ecf0f1;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.records-table tbody tr:hover {
+  background-color: #f5f9ff;
+}
+
+.records-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.records-table tfoot {
+  font-weight: 500;
+  background-color: #f1f8fe;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Export section */
+.export-section {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.export-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.export-btn:hover {
+  background-color: #2ecc71;
+}
+
+.export-btn:active {
+  background-color: #219653;
+}
+
+/* Loading and error states */
+.loading, .error-message, .no-records {
+  padding: 40px;
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading {
+  color: #3498db;
+}
+
+.error-message {
+  color: #e74c3c;
+}
+
+.no-records {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .client-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .records-table {
+    font-size: 13px;
+  }
+  
+  .records-table th,
+  .records-table td {
+    padding: 10px;
+  }
+}
+
+/* Add this to your HTML file or update your existing styles */
+@media (max-width: 640px) {
+  .records-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .gst-records-container {
+    padding: 10px;
+  }
+}
+.client-export-btn {
+  background-color: #2ecc71;
+  color: white;
+  padding: 8px 15px;
+  border: 1px;
+}
+
+.client-export-btn:hover {
+  background-color: #27ae60;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(46, 204, 113, 0.3);
+}
+
+/* Loading and empty states */
+.loading,
+.error-message,
+.no-records {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 20px 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e74c3c;
+  background-color: #fdf3f2;
+}
+
+.export-section {
+  margin-top: 30px;
+  text-align: center;
+}

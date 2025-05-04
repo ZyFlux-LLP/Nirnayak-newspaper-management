@@ -1,0 +1,452 @@
+/* General Layout */
+.billing-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .billing-workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .billing-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Client List Styles */
+  .client-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .search-container {
+    margin-bottom: 15px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .clients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+  }
+  
+  .client-card {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 15px;
+    cursor: pointer;
+    border-left: 4px solid #333;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .client-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .client-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .client-type {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .client-gst {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+  }
+  
+  .client-type-central {
+    border-left-color: #4a90e2;
+  }
+  
+  .client-type-state {
+    border-left-color: #50b83c;
+  }
+  
+  .client-type-private {
+    border-left-color: #f0c14b;
+  }
+  
+  .add-client-btn {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+  
+  .add-client-btn:hover {
+    background-color: #3a80d2;
+  }
+  
+  /* Ad Form Styles */
+  .ad-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+  }
+  
+  .form-control {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .radio-group {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .client-type-indicator {
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  
+  .price-preview {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed #ddd;
+  }
+  
+  .price-row.total {
+    font-weight: bold;
+    border-bottom: none;
+    border-top: 2px solid #ddd;
+    padding-top: 10px;
+    margin-top: 5px;
+  }
+  
+  .form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .btn-submit {
+    background-color: #50b83c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .btn-submit:hover {
+    background-color: #40a82c;
+  }
+  
+  /* Invoice Generator Styles */
+  .invoice-preview {
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .newspaper-logo h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #333;
+  }
+  
+  .invoice-details h3 {
+    margin-top: 0;
+    color: #4a90e2;
+  }
+  
+  .invoice-addresses {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .from-address, .to-address {
+    max-width: 40%;
+  }
+  
+  .from-address p, .to-address p {
+    margin: 5px 0;
+  }
+  
+  .invoice-table {
+    margin: 30px 0;
+  }
+  
+  .invoice-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .invoice-table th, .invoice-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .invoice-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .invoice-table .small-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+  
+  .subtotal-row {
+    background-color: #f9f9f9;
+  }
+  
+  .total-row {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .invoice-footer {
+    margin-top: 30px;
+    text-align: center;
+    color: #666;
+  }
+  
+  .terms {
+    font-size: 12px;
+    font-style: italic;
+  }
+  
+  .invoice-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .btn-download, .btn-email, .btn-save {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .btn-download {
+    background-color: #4a90e2;
+    color: white;
+  }
+  
+  .btn-email {
+    background-color: #50b83c;
+    color: white;
+  }
+  
+  .btn-save {
+    background-color: #f0c14b;
+    color: #333;
+  }
+  
+  .btn-download:hover, .btn-email:hover, .btn-save:hover {
+    opacity: 0.9;
+  }
+  
+  /* GST Records Page Styles */
+  .gst-records-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .filters-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 6px;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .filter-group select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 150px;
+  }
+  
+  .gst-report {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .export-btn {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .summary-card {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .summary-card h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #666;
+  }
+  
+  .summary-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0 0;
+    color: #333;
+  }
+  
+  .gst-breakdown {
+    margin-bottom: 30px;
+  }
+  
+  .gst-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+  }
+  
+  .gst-card {
+    background-color: #f0f7ff;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+  }
+  
+  .gst-card h4 {
+    margin-top: 0;
+    color: #4a90e2;
+  }
+  
+  .gst-value {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0 0;
+  }
+  
+  .client-type-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .client-type-table th, .client-type-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .client-type-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .records-table-container {
+    margin-top: 30px;
+  }
+  
+  .records-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .records-table th, .records-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
