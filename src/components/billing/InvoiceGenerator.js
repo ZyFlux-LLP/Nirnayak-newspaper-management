@@ -29,13 +29,22 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
   };
 
   // Get dimensions from adDetails - now uses the actual length and breadth from the form
+  // Modified to round down to whole numbers for display
   const dimensions = React.useMemo(() => {
     if (adDetails.adLength && adDetails.adBreadth) {
       // Use the actual dimensions provided by the updated form
+      const length = parseFloat(adDetails.adLength);
+      const width = parseFloat(adDetails.adBreadth);
+      const area = length * width;
+      
       return {
-        length: parseFloat(adDetails.adLength),
-        width: parseFloat(adDetails.adBreadth),
-        area: parseFloat(adDetails.adLength) * parseFloat(adDetails.adBreadth)
+        length: length,
+        width: width,
+        area: area,
+        // For display only (rounded down to whole numbers)
+        displayLength: Math.floor(length),
+        displayWidth: Math.floor(width),
+        displayArea: Math.floor(area)
       };
     } else if (adDetails.adSize) {
       // Fallback for backward compatibility
@@ -43,10 +52,21 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
       return {
         length: Math.round(side),
         width: Math.round(side),
-        area: adDetails.adSize
+        area: adDetails.adSize,
+        // For display only (rounded down to whole numbers)
+        displayLength: Math.floor(Math.round(side)),
+        displayWidth: Math.floor(Math.round(side)),
+        displayArea: Math.floor(adDetails.adSize)
       };
     }
-    return { length: '-', width: '-', area: '-' };
+    return { 
+      length: '-', 
+      width: '-', 
+      area: '-',
+      displayLength: '-',
+      displayWidth: '-',
+      displayArea: '-'
+    };
   }, [adDetails.adLength, adDetails.adBreadth, adDetails.adSize]);
 
   // Get city information from adDetails - with separated address and pincode
@@ -305,7 +325,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
             <div className="particulars-column">
               <p>{adDetails.invoiceId || '213'}</p>
               <p>{adDetails.roNumber || '-'}</p>
-              <p>{dimensions.area.toFixed(2)} cm²</p>
+              <p>{dimensions.displayArea} cm²</p>
               <p>{client.name || '-'}</p>
               <p>{formatDate(adDetails.date)}</p>
               <p>{adDetails.roDate ? formatDate(adDetails.roDate) : '-'}</p>
@@ -345,9 +365,9 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                 <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: 'none' }}>उपरोक्त आदेश के तहत विज्ञापन का प्रकाश</td>
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>1</td>
                 <td style={{ border: '1px solid #000', padding: '5px' }}>Publication Charges</td>
-                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.length.toFixed(2)}</td>
-                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.width.toFixed(2)}</td>
-                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.area.toFixed(2)}</td>
+                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.displayLength}</td>
+                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.displayWidth}</td>
+                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.displayArea}</td>
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>
                   {(parseFloat(adDetails.ratePerSqCm) || 0).toFixed(2)}
                 </td>

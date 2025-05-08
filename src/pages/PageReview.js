@@ -425,89 +425,112 @@ const Review = () => {
     }
   };
 
-  // Render related pages status
-  const renderRelatedPagesStatus = () => {
-    if (!relatedPagesStatus) return null;
-
-    const currentPageNumber = parseInt(pageData?.pageNumber);
-    let groupLabel;
-
-    if (currentPageNumber === 1 || currentPageNumber === 8) {
-      groupLabel = "Cover Pages Group (1 & 8)";
-    } else {
-      groupLabel = "Inner Pages Group (2-7)";
+{/* Add this function to the Review.js component */}
+const handleViewApprovedPages = () => {
+  // Navigate to ApprovedPages view with necessary data
+  navigate('/approved-pages', {
+    state: {
+      edition: pageData.edition,
+      date: pageData.date,
+      currentPageNumber: pageData.pageNumber,
+      groupType: parseInt(pageData.pageNumber) === 1 || parseInt(pageData.pageNumber) === 8 ? 'cover' : 'inner'
     }
+  });
+};
 
-    // Get the status of the current group
-    const allApproved = checkAllRelatedPagesApproved();
-    const entireGroupApproved = isEntireGroupApproved();
-    const hasPendingPages = hasPendingPagesInGroup();
+{/* Modify the renderRelatedPagesStatus function to add unapprove option */}
 
-    const relatedPagesList = Object.entries(relatedPagesStatus).map(([pageNum, status]) => {
-      return (
-        <div key={pageNum} className="related-page-item">
-          <div className="related-page-info">
-            <span className="related-page-number">Page {pageNum}:</span>
-            <span className={`related-page-status status-${status.status || 'unknown'}`}>
-              {status.exists ? (status.status || 'unknown') : 'Not Uploaded'}
-            </span>
-          </div>
-          {status.exists && status.id && (
-            <button
-              className="view-related-page-button"
-              onClick={() => navigateToRelatedPage(status.id)}
-              title={`View Page ${pageNum}`}
-            >
-              <Eye size={16} /> View Page
-            </button>
-          )}
-        </div>
-      );
-    });
+const renderRelatedPagesStatus = () => {
+  if (!relatedPagesStatus) return null;
 
+  const currentPageNumber = parseInt(pageData?.pageNumber);
+  let groupLabel;
+
+  if (currentPageNumber === 1 || currentPageNumber === 8) {
+    groupLabel = "Cover Pages Group (1 & 8)";
+  } else {
+    groupLabel = "Inner Pages Group (2-7)";
+  }
+
+  // Get the status of the current group
+  const allApproved = checkAllRelatedPagesApproved();
+  const entireGroupApproved = isEntireGroupApproved();
+  const hasPendingPages = hasPendingPagesInGroup();
+
+  const relatedPagesList = Object.entries(relatedPagesStatus).map(([pageNum, status]) => {
     return (
-      <div className="related-pages-card">
-        <h3>{groupLabel} Status</h3>
-        <div className="related-pages-list">
-          {relatedPagesList}
-        </div>
-        <div className="group-status">
-          <span className="group-status-label">Group Status:</span>
-          <span className={`group-status-value ${entireGroupApproved ? 'status-complete' : 'status-incomplete'}`}>
-            {entireGroupApproved ? 'Approved' : (hasPendingPages ? 'Awaiting Approvals' : 'Ready to Send')}
+      <div key={pageNum} className="related-page-item">
+        <div className="related-page-info">
+          <span className="related-page-number">Page {pageNum}:</span>
+          <span className={`related-page-status status-${status.status || 'unknown'}`}>
+            {status.exists ? (status.status || 'unknown') : 'Not Uploaded'}
           </span>
         </div>
-
-        {entireGroupApproved ? (
-          <div className="group-notice">
-            All pages in this group are approved. You can resend the notification now.
-          </div>
-        ) : allApproved && pageData.status !== 'accepted' ? (
-          <div className="group-notice">
-            All related pages are approved. Approving this page will send the entire group to printing!
-          </div>
-        ) : null}
-
-        <div className="group-actions">
+        {status.exists && status.id && (
           <button
-            className="approve-all-button"
-            onClick={handleApproveAll}
-            disabled={isApprovingAll || entireGroupApproved}
+            className="view-related-page-button"
+            onClick={() => navigateToRelatedPage(status.id)}
+            title={`View Page ${pageNum}`}
           >
-            {isApprovingAll ? (
-              <>
-                <div className="spinner-small"></div> Processing...
-              </>
-            ) : (
-              <>
-                <CheckCircle size={16} /> Approve All
-              </>
-            )}
+            <Eye size={16} /> View Page
           </button>
-        </div>
+        )}
       </div>
     );
-  };
+  });
+
+  return (
+    <div className="related-pages-card">
+      <h3>{groupLabel} Status</h3>
+      <div className="related-pages-list">
+        {relatedPagesList}
+      </div>
+      <div className="group-status">
+        <span className="group-status-label">Group Status:</span>
+        <span className={`group-status-value ${entireGroupApproved ? 'status-complete' : 'status-incomplete'}`}>
+          {entireGroupApproved ? 'Approved' : (hasPendingPages ? 'Awaiting Approvals' : 'Ready to Send')}
+        </span>
+      </div>
+
+      {entireGroupApproved ? (
+        <div className="group-notice">
+          All pages in this group are approved. You can resend the notification or unapprove pages if needed.
+        </div>
+      ) : allApproved && pageData.status !== 'accepted' ? (
+        <div className="group-notice">
+          All related pages are approved. Approving this page will send the entire group to printing!
+        </div>
+      ) : null}
+
+      <div className="group-actions">
+        <button
+          className="approve-all-button"
+          onClick={handleApproveAll}
+          disabled={isApprovingAll || entireGroupApproved}
+        >
+          {isApprovingAll ? (
+            <>
+              <div className="spinner-small"></div> Processing...
+            </>
+          ) : (
+            <>
+              <CheckCircle size={16} /> Approve All
+            </>
+          )}
+        </button>
+        
+        {entireGroupApproved && (
+          <button
+            className="unapprove-button"
+            onClick={handleViewApprovedPages}
+          >
+            <XCircle size={16} /> Unapprove Pages
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
   if (isLoading) {
     return (

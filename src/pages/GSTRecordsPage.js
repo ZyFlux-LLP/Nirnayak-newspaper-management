@@ -179,7 +179,7 @@ const GSTRecordsPage = () => {
       return {
         "Sr No.": index + 1,
         "Date": formatDate(record.date),
-        "Bill No.": record.invoiceNumber || record.id || "N/A",
+        "Bill No.": record.invoiceId || record.id || "N/A",
         "Client GST Number": record.gstNumber || "N/A",
         "Adv Size": record.dimensions?.area?.toFixed(2) || "N/A",
         "Publication Charges": record.publicationCharges?.toFixed(2) || '0.00',
@@ -188,17 +188,17 @@ const GSTRecordsPage = () => {
         "Final Price": record.finalPrice?.toFixed(2) || '0.00'
       };
     });
-    
+  
     // Calculate totals for this client
-    const totalPublicationCharges = clientRecords.reduce((sum, record) => 
+    const totalPublicationCharges = clientRecords.reduce((sum, record) =>
       sum + (record.publicationCharges || 0), 0);
-    const totalColorCharge = clientRecords.reduce((sum, record) => 
+    const totalColorCharge = clientRecords.reduce((sum, record) =>
       sum + (record.colorCharge || 0), 0);
-    const totalGST = clientRecords.reduce((sum, record) => 
+    const totalGST = clientRecords.reduce((sum, record) =>
       sum + (record.gstAmount || 0), 0);
-    const totalFinalPrice = clientRecords.reduce((sum, record) => 
+    const totalFinalPrice = clientRecords.reduce((sum, record) =>
       sum + (record.finalPrice || 0), 0);
-    
+  
     // Add totals row
     formattedRecords.push({
       "Sr No.": "",
@@ -211,10 +211,10 @@ const GSTRecordsPage = () => {
       "GST Amount": totalGST.toFixed(2),
       "Final Price": totalFinalPrice.toFixed(2)
     });
-    
+  
     // Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(formattedRecords);
-    
+  
     // Set column widths for better readability
     const colWidths = [
       { wch: 8 },  // Sr No
@@ -228,17 +228,26 @@ const GSTRecordsPage = () => {
       { wch: 15 }  // Final Price
     ];
     worksheet['!cols'] = colWidths;
-    
+  
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, `${clientName}`);
-    
+  
+    // FIX: sanitize and truncate sheet name
+    let safeSheetName = clientName.replace(/[\[\]\*\/\\\:\?]/g, '');
+    if (safeSheetName.length > 31) {
+      safeSheetName = safeSheetName.substring(0, 31);
+    }
+    if (!safeSheetName) safeSheetName = 'Sheet1';
+  
+    XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName);
+  
     // Generate filename with client name and current date
     const dateStr = new Date().toISOString().slice(0, 10);
     const filename = `${clientName}_GST_Records_${dateStr}.xlsx`;
-    
+  
     // Write file
     XLSX.writeFile(workbook, filename);
   };
+  
   
   // Function to export all filtered records to Excel (existing function)
   const exportToExcel = () => {
@@ -249,7 +258,7 @@ const GSTRecordsPage = () => {
       return {
         "Sr No.": index + 1,
         "Date": formatDate(record.date),
-        "Bill No.": record.invoiceNumber || record.id || "N/A",
+        "Bill No.": record.invoiceId || record.id || "N/A",
         "Client Name": record.clientName,
         "Client GST Number": record.gstNumber || "N/A",
         "Adv Size": record.dimensions?.area?.toFixed(2) || "N/A",

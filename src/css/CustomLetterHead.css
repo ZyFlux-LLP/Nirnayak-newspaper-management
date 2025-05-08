@@ -188,6 +188,7 @@ body {
 .letterhead-address {
   flex: 0 0 justify; /* Keeps right side fixed */
   font-size: 14px;
+  white-space: pre-line;
   color: #d40000;
   font-weight: bold;
 }
@@ -208,6 +209,7 @@ body {
   min-height: 650px; /* Increased for better content space */
   display: flex;
   flex-direction: column;
+  font-weight: bold; /* Make all letterhead content bold by default */
 }
 
 .content-header {
@@ -222,9 +224,20 @@ body {
   color: var(--primary-color);
 }
 
+/* Exclude header addresses from bold formatting */
+.letterhead-header,
+.letterhead-address,
+.letterhead-logo,
+.letterhead-tagline {
+  font-weight: bold; /* Reset to normal weight for header elements */
+}
+
+/* Keep the receiver address normal weight */
 .receiver-address p {
   margin-bottom: 4px;
   line-height: 1.4;
+  font-weight: bold; /* Make receiver address bold */
+  color: black; /* Ensure text is black */
 }
 
 /* Updated Signature Section with reduced gap */
@@ -238,7 +251,7 @@ body {
 
 .signature-label {
   margin-bottom: 20px !important; /* Reduced from 60px to 20px */
-  font-weight: normal;
+  font-weight: normal; /* Keep signature label normal */
   color: var(--text-muted);
 }
 
@@ -367,6 +380,7 @@ body {
   white-space: pre-wrap;
   padding: 10px 0;
   min-height: 300px; /* Ensure minimum height for content area */
+  font-weight: bold; /* Make content bold */
 }
 
 .document-content-preview p {
@@ -376,6 +390,7 @@ body {
   width: 100%;
   max-width: 100%;
   text-align: left;
+  font-weight: bold; /* Make paragraphs bold */
 }
 
 .letterhead-editor {
@@ -398,6 +413,7 @@ body {
   text-align: left;
   margin-bottom: 10px;
   white-space: pre-wrap;
+  font-weight: bold; /* Make paragraphs bold */
 }
 
 /* Subject line formatting */
@@ -408,11 +424,14 @@ body {
   max-width: 100%;
   text-align: left;
   margin-bottom: 10px;
+  font-weight: bold; /* Make subject line bold */
+  font-size: 15px !important; /* Increase subject font size to 15px */
 }
 
 .subject-label {
   font-weight: bold;
   margin-right: 5px;
+  font-size: 15px !important; /* Increase subject font size to 15px */
 }
 
 .subject-content {
@@ -421,6 +440,8 @@ body {
   display: inline;
   max-width: 90%;
   text-align: left;
+  font-weight: bold; /* Make subject content bold */
+  font-size: 15px !important; /* Increase subject font size to 15px */
 }
 
 /* Responsive adjustments but maintaining A4 ratio for PDF export */
@@ -493,11 +514,34 @@ body {
 .letterhead-preview .document-content-preview p,
 .letterhead-preview .content-paragraph,
 .letterhead-preview .subject-line,
-.letterhead-preview .subject-content,
-.letterhead-preview .signature-section,
-.letterhead-preview .signature-name {
+.letterhead-preview .subject-content {
+  font-size: 15px !important; /* Increase to 15px */
+  line-height: 1.5 !important;
+  font-weight: bold; /* Make all content bold */
+}
+
+/* Keep letterhead header elements and receiver address normal weight */
+.letterhead-preview .letterhead-header p,
+.letterhead-preview .letterhead-address p,
+.letterhead-preview .letterhead-tagline p {
+  font-weight: bold; /* Reset to normal weight for excluded elements */
+}
+
+/* Override to make receiver address bold */
+.letterhead-preview .receiver-address p {
+  font-weight: bold;
+  color: black;
+}
+
+/* Keep signature section styling */
+.letterhead-preview .signature-section {
   font-size: 14px !important;
   line-height: 1.5 !important;
+}
+
+.letterhead-preview .signature-name {
+  font-size: 18px !important;
+  font-weight: 600;
 }
 
 /* Prevent text scaling on mobile when in landscape mode */
@@ -512,11 +556,13 @@ body {
     font-size: 14px !important;
     max-height: none !important; /* Remove any max-height constraints */
     overflow: visible !important; /* Ensure content doesn't get cut off */
+    font-weight: bold; /* Maintain bold font weight */
   }
   
   /* Force consistent font size for long content */
   .content-paragraph {
     font-size: 14px !important;
+    font-weight: bold; /* Maintain bold font weight */
   }
 }
 

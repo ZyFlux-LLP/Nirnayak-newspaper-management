@@ -24,6 +24,7 @@ import LetterheadNotepad from './pages/CustomLetterHead';
 import AdminSidebar from './components/Sidebar';
 import OperatorsPage from './pages/OperatorsPage';
 import EditOperatorPage from './pages/EditOperatorPage';
+import ApprovedPages from './pages/ApprovedPages';
 
 // Authentication context
 export const AuthContext = React.createContext();
@@ -185,6 +186,7 @@ function AppLayout() {
           <Route path="/clients/add" element={<AddClientPage />} />
           <Route path="/clients/edit/:clientId" element={<EditClientPage />} />
           <Route path="/review/:pageId" element={<PageReview />} />
+          <Route path="/approved-pages" element={<ApprovedPages />} />
           <Route path="/adminBilling" element={<ProtectedRoute element={<BillingPage />} requiredRole="admin" />} />
           <Route path="/letterhead" element={<ProtectedRoute element={<LetterheadNotepad />} requiredRole="admin" />} />
           <Route path="/archiveAdmin" element={<ProtectedRoute element={<ArchivePage />} requiredRole="admin" />} />

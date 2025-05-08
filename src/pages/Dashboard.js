@@ -230,13 +230,14 @@ const generateAndDownloadPdf = async (date, edition) => {
       setGeneratedPdfs(updatedPdfs);
 
       // Store PDF information in Firestore
+      // The date parameter already contains the selected date, so we're using it correctly here
       try {
           await addDoc(collection(db, 'newspaper_data'), {
-              date: date,
+              date: date, // This is already the selected date passed from the calling function
               edition: edition,
               issueNumber: customIssueNumber,
               pdfUrl: result.pdfUrl,
-              timestamp: new Date(),
+              timestamp: new Date(), // This is just the current timestamp of when the PDF was generated
               title: title
           });
           console.log(`✅ PDF information stored in Firestore for ${edition} on ${date}`);

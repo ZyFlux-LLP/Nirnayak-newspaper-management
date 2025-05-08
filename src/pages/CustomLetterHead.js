@@ -23,7 +23,6 @@ const HindiLetterhead = () => {
   const calendarRef = useRef(null);
   const [dateDisplayValue, setDateDisplayValue] = useState(formatDate(new Date()));
 
-  // ऑफिस लोकेशन्स
   const offices = {
     ujjain: {
       title: 'उज्जैन',
@@ -36,13 +35,14 @@ const HindiLetterhead = () => {
     },
     indore: {
       title: 'इंदौर',
-      address: 'मुद्रित एम.डी. - 56 बजरंगनगर (71 एम.जी. डुप्लेक्स) इंदौर 4520001 म.प्र मो. 9424560111) * RNI No.-MPHIN/2013/50289',
+      address: `मुद्रित एम.डी. - 56 बजरंगनगर (71 एम.जी. डुप्लेक्स) इंदौर 4520001 म.प्र.\nMob. 9424560111\nRNI No.-MPHIN/2013/50289`,
       phone: 'Mob. 9826235467 - 9826235467',
       landline: '0731-2345678, 0731-4056789',
       email: 'nirnayak.news@gmail.com, nirnayak_news@yahoo.co.in',
       dprCode: 'DPR Code - 0539 (Indore)'
     }
   };
+  
 
   // चयनित दिनांक को भारतीय प्रारूप में प्रदर्शित करें
   function formatDate(date) {

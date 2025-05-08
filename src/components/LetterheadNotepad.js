@@ -76,7 +76,7 @@ const LetterheadNotepad = ({ companyLogo, companyName, companyAddress, companyCo
       Document,
       Paragraph,
       Text,
-      Bold,
+      Bold.configure({ HTMLAttributes: { class: 'bold-text' } }),
       Italic,
       Underline,
       Heading.configure({
@@ -85,7 +85,12 @@ const LetterheadNotepad = ({ companyLogo, companyName, companyAddress, companyCo
       BulletList,
       OrderedList,
     ],
-    content: '<p>Start typing your document content here...</p>',
+    content: '<p><strong>Start typing your document content here...</strong></p>', // Default content is now bold
+    editorProps: {
+      attributes: {
+        class: 'bold-by-default',
+      },
+    },
   });
 
   const handleDocumentTitleChange = (e) => {
@@ -144,6 +149,16 @@ const LetterheadNotepad = ({ companyLogo, companyName, companyAddress, companyCo
         return 'OFFICIAL DOCUMENT';
     }
   };
+
+  // Apply bold styling to editor content when it changes
+  React.useEffect(() => {
+    if (editor) {
+      // Initially set all content to bold
+      editor.commands.selectAll();
+      editor.commands.setBold();
+      editor.commands.focus('end');
+    }
+  }, [editor]);
 
   return (
     <div className="letterhead-notepad-container">
