@@ -15,6 +15,7 @@ const AdForm = ({ client, onSubmit }) => {
     additionalInfo: '',
     roNumber: '', // RO number field
     roDate: '', // No default date now
+    publicationDate: '', // NEW: Publication date field
     city: 'indore', // Default city selection
     billNumber: '' // Added user input bill number field
   });
@@ -115,7 +116,7 @@ const AdForm = ({ client, onSubmit }) => {
       adLength: prevData.adBreadth,
       adBreadth: prevData.adLength
     }));
-    
+
     // If area was entered first, this won't change the area
     // If dimensions were entered first, the area calculation remains the same when swapping
   };
@@ -123,7 +124,7 @@ const AdForm = ({ client, onSubmit }) => {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Determine the input method if not already set
     if (!inputMethod) {
       if (name === 'adArea') {
@@ -132,46 +133,46 @@ const AdForm = ({ client, onSubmit }) => {
         setInputMethod('dimensions');
       }
     }
-    
+
     // Handle area input
     if (name === 'adArea') {
       const area = parseFloat(value) || 0;
-      
+
       if (area > 0) {
         // Calculate dimensions as a square or maintain aspect ratio
         const { length, breadth } = calculateDimensionsFromArea(area);
-        
+
         setFormData(prevData => ({
           ...prevData,
           adArea: value,
           adLength: length,
           adBreadth: breadth
         }));
-        
+
         setCalculatedArea(area);
-        
+
         // Update price preview if we have all the needed data
         if (formData.ratePerSqCm) {
           updatePricePreview(area);
         }
-        
+
         return; // Exit early as we've already updated the form state
       }
     }
-    
+
     // Handle dimension changes based on input method
     if ((name === 'adLength' || name === 'adBreadth') && inputMethod) {
       const newValue = parseFloat(value) || 0;
-      
+
       if (inputMethod === 'area' && formData.adArea) {
         // If area was entered first, maintain constant area
         const area = parseFloat(formData.adArea);
-        
+
         if (area > 0 && newValue > 0) {
           if (name === 'adLength') {
             // Calculate new breadth based on constant area and new length
             const newBreadth = (area / newValue).toFixed(2);
-            
+
             setFormData(prevData => ({
               ...prevData,
               adLength: value,
@@ -180,47 +181,47 @@ const AdForm = ({ client, onSubmit }) => {
           } else { // name === 'adBreadth'
             // Calculate new length based on constant area and new breadth
             const newLength = (area / newValue).toFixed(2);
-            
+
             setFormData(prevData => ({
               ...prevData,
               adBreadth: value,
               adLength: newLength
             }));
           }
-          
+
           // Update price preview if needed
           if (formData.ratePerSqCm) {
             updatePricePreview(area);
           }
-          
+
           return; // Exit early as we've already updated the form state
         }
       } else if (inputMethod === 'dimensions') {
         // If dimensions were entered first, recalculate area
         let newLength = name === 'adLength' ? newValue : parseFloat(formData.adLength) || 0;
         let newBreadth = name === 'adBreadth' ? newValue : parseFloat(formData.adBreadth) || 0;
-        
+
         if (newLength > 0 && newBreadth > 0) {
           const newArea = (newLength * newBreadth).toFixed(2);
-          
+
           setFormData(prevData => ({
             ...prevData,
             [name]: value,
             adArea: newArea
           }));
-          
+
           setCalculatedArea(parseFloat(newArea));
-          
+
           // Update price preview if needed
           if (formData.ratePerSqCm) {
             updatePricePreview(parseFloat(newArea));
           }
-          
+
           return; // Exit early as we've already updated the form state
         }
       }
     }
-    
+
     // Standard handling for other fields
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
@@ -281,6 +282,7 @@ const AdForm = ({ client, onSubmit }) => {
         createdAt: new Date(),
         roNumber: formData.roNumber,
         roDate: formData.roDate,
+        publicationDate: formData.publicationDate,
         city: formData.city,
         cityInfo: selectedCityInfo,
         billNumber: formData.billNumber // Store the user-provided bill number
@@ -338,6 +340,7 @@ const AdForm = ({ client, onSubmit }) => {
       date: new Date().toISOString(),
       roNumber: formData.roNumber,
       roDate: formData.roDate,
+      publicationDate: formData.publicationDate,
       cityInfo: selectedCityInfo,
       billNumber: formData.billNumber // Include the user-provided bill number
     };
@@ -454,6 +457,19 @@ const AdForm = ({ client, onSubmit }) => {
         />
       </div>
 
+      {/* NEW: Publication Date Field */}
+      <div className="form-group">
+        <label>Publication Date: <span className="required-field"></span></label>
+        <input
+          type="date"
+          name="publicationDate"
+          value={formData.publicationDate}
+          onChange={handleChange}
+          required
+          className="form-control"
+        />
+      </div>
+
       {/* Dimensions Section */}
       <div className="dimensions-section">
         <div className="form-row">
@@ -465,8 +481,8 @@ const AdForm = ({ client, onSubmit }) => {
               value={formData.adLength}
               onChange={handleChange}
               required
-              min="0.1"
-              step="0.1"
+              min="0.01"
+              step="any"
               className="form-control"
             />
           </div>
@@ -490,8 +506,8 @@ const AdForm = ({ client, onSubmit }) => {
               value={formData.adBreadth}
               onChange={handleChange}
               required
-              min="0.1"
-              step="0.1"
+              min="0.01"
+              step="any"
               className="form-control"
             />
           </div>
@@ -506,8 +522,8 @@ const AdForm = ({ client, onSubmit }) => {
             value={formData.adArea}
             onChange={handleChange}
             required
-            min="0.1"
-            step="0.1"
+            min="0.01"
+            step="any"
             className="form-control"
           />
         </div>
@@ -522,7 +538,7 @@ const AdForm = ({ client, onSubmit }) => {
           onChange={handleChange}
           required
           min="1"
-          step="0.01"
+          step="any"
           className="form-control"
         />
       </div>

@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-// import logo from '../../assets/Nirnayak_new_logo-removebg-preview (1).png';  // Adjust path based on location
-import logo from '../../assets/Nirnayak Logo.png';  // Adjust path based on location
+import logo from '../../assets/Nirnayak Logo.png';
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
@@ -28,11 +27,9 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
     });
   };
 
-  // Get dimensions from adDetails - now uses the actual length and breadth from the form
-  // Modified to round down to whole numbers for display
+  // Get dimensions from adDetails
   const dimensions = React.useMemo(() => {
     if (adDetails.adLength && adDetails.adBreadth) {
-      // Use the actual dimensions provided by the updated form
       const length = parseFloat(adDetails.adLength);
       const width = parseFloat(adDetails.adBreadth);
       const area = length * width;
@@ -41,19 +38,16 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
         length: length,
         width: width,
         area: area,
-        // For display only (rounded down to whole numbers)
         displayLength: Math.floor(length),
         displayWidth: Math.floor(width),
         displayArea: Math.floor(area)
       };
     } else if (adDetails.adSize) {
-      // Fallback for backward compatibility
       const side = Math.sqrt(adDetails.adSize);
       return {
         length: Math.round(side),
         width: Math.round(side),
         area: adDetails.adSize,
-        // For display only (rounded down to whole numbers)
         displayLength: Math.floor(Math.round(side)),
         displayWidth: Math.floor(Math.round(side)),
         displayArea: Math.floor(adDetails.adSize)
@@ -69,14 +63,12 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
     };
   }, [adDetails.adLength, adDetails.adBreadth, adDetails.adSize]);
 
-  // Get city information from adDetails - with separated address and pincode
+  // Get city information from adDetails
   const cityInfo = React.useMemo(() => {
-    // If cityInfo is directly available in adDetails (from the updated form)
     if (adDetails.cityInfo) {
       return adDetails.cityInfo;
     }
 
-    // Default city info based on selected city or default to Indore if not specified
     const city = adDetails.city || 'indore';
 
     const cityData = {
@@ -103,12 +95,10 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
   const convertToWords = (num) => {
     if (!num) return "Zero Rupees Only";
   
-    // Handle decimals
     const parts = num.toFixed(2).split('.');
-    let rupees = parseInt(parts[0]);  // Changed from const to let
+    let rupees = parseInt(parts[0]);
     const paise = parseInt(parts[1]);
   
-    // Function to convert numbers to words
     const singleDigit = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -126,25 +116,20 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
   
     let result = '';
   
-    // Handle lakhs (100,000s)
     if (rupees >= 100000) {
       result += convertToWordsLessThanThousand(Math.floor(rupees / 100000)) + ' Lakh ';
-      rupees %= 100000;  // This is where the error occurs - reassigning to a const
+      rupees %= 100000;
     }
   
-    // Handle thousands
     if (rupees >= 1000) {
       result += convertToWordsLessThanThousand(Math.floor(rupees / 1000)) + ' Thousand ';
-      rupees %= 1000;  // This is also reassigning to a const
+      rupees %= 1000;
     }
   
-    // Handle hundreds and below
     result += convertToWordsLessThanThousand(rupees);
   
-    // Add rupees
     result = result.trim() + ' Rupees';
   
-    // Add paise if any
     if (paise > 0) {
       result += ' and ' + convertToWordsLessThanThousand(paise) + ' Paise';
     }
@@ -163,11 +148,9 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
         return;
       }
   
-      // Set fixed width for rendering consistency
       const originalWidth = element.style.width;
       element.style.width = '800px';
   
-      // Generate canvas from the invoice element
       const canvas = await html2canvas(element, {
         scale: 2,
         logging: false,
@@ -175,39 +158,30 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
         allowTaint: true
       });
   
-      // Restore original width
       element.style.width = originalWidth;
   
-      // Convert canvas to image
       const imgData = canvas.toDataURL('image/png');
   
-      // A4 width in mm
       const pageWidth = 210;
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
   
-      // Initialize PDF with custom height based on content
       const pdfDoc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: [imgWidth, imgHeight],
       });
   
-      // Add image to PDF
       pdfDoc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
   
-      // File name
       const fileName = `invoice_${adDetails.invoiceId || invoiceNumber}.pdf`;
   
-      // Convert to Blob for Firebase upload
       const pdfBlob = pdfDoc.output('blob');
   
-      // Firebase upload
       const storageRef = ref(storage, `invoices/${fileName}`);
       const snapshot = await uploadBytes(storageRef, pdfBlob);
       const pdfUrl = await getDownloadURL(snapshot.ref);
   
-      // Prepare Firestore document
       const invoiceData = {
         invoiceId: adDetails.invoiceId,
         clientName: client.name,
@@ -217,6 +191,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
         date: adDetails.date,
         roNumber: adDetails.roNumber,
         roDate: adDetails.roDate,
+        publicationDate: adDetails.publicationDate,
         pdfUrl: pdfUrl,
         basePrice: adDetails.basePrice,
         finalPrice: adDetails.finalPrice,
@@ -233,13 +208,11 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
         createdAt: new Date()
       };
   
-      // Save to Firestore
       await addDoc(collection(firestore, 'invoices'), invoiceData);
   
       setSavedMessage('Invoice PDF exported and saved to Firebase!');
       setTimeout(() => setSavedMessage(''), 3000);
   
-      // Optional: download the file as well
       pdfDoc.save(fileName);
   
     } catch (error) {
@@ -249,33 +222,6 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  // Calculate tax displays based on client type
-  const taxDisplay = React.useMemo(() => {
-    if (client.type === 'central') {
-      return { label: 'IGST (5%)', value: adDetails.gstAmount };
-    } else if (client.type === 'state') {
-      return {
-        cgst: { label: 'CGST (2.5%)', value: adDetails.gstAmount / 2 },
-        sgst: { label: 'SGST (2.5%)', value: adDetails.gstAmount / 2 }
-      };
-    } else {
-      return { label: 'GST (5%)', value: adDetails.gstAmount };
-    }
-  }, [client.type, adDetails.gstAmount]);
-
-  // Get a display name for the selected city
-  const cityDisplayName = adDetails.city === 'ujjain' ? 'Ujjain' : 'Indore';
-
-  // Helper function to determine bank detail text for specific rows
-  const getBankDetailText = (row) => {
-    if (row === 1) return 'Our Bank Detail -';
-    if (row === 2) return 'Bank Name - Bank of India';
-    if (row === 3) return 'Branch Freeganj Ujjain';
-    if (row === 4) return 'A/c No. : 910130110002710';
-    if (row === 5) return 'IFSC - BKID0009101';
-    return '';
   };
 
   return (
@@ -327,7 +273,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
               <p>{adDetails.roNumber || '-'}</p>
               <p>{dimensions.displayArea} cm²</p>
               <p>{client.name || '-'}</p>
-              <p>{formatDate(adDetails.date)}</p>
+              <p>{adDetails.publicationDate ? formatDate(adDetails.publicationDate) : '-'}</p>
               <p>{adDetails.roDate ? formatDate(adDetails.roDate) : '-'}</p>
             </div>
           </div>
@@ -374,7 +320,6 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right' }}>{adDetails.basePrice?.toFixed(2) || '-'}</td>
               </tr>
 
-              {/* Color charges row */}
               {adDetails.colorCharge > 0 && (
                 <tr>
                   <td style={{ border: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>Our Bank Detail -</td>
@@ -407,12 +352,10 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                 </tr>
               )}
 
-              {/* Tax rows depend on client type */}
               {client.type === 'state' ? (
                 <>
                   <tr>
                     <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: '1px solid #000' }}>
-                      {/* Simplified bank details display logic for state client type */}
                       {client.type === 'private' && adDetails.commission > 0 ? 
                         (adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India') : 
                         (adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India')}
@@ -428,7 +371,6 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                   </tr>
                   <tr>
                     <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: '1px solid #000' }}>
-                      {/* Display next bank detail for state client type */}
                       {client.type === 'private' && adDetails.commission > 0 ?
                         (adDetails.colorCharge > 0 ? 'A/c No. : 910130110002710' : 'Branch Freeganj Ujjain') :
                         (adDetails.colorCharge > 0 ? 'A/c No. : 910130110002710' : 'Branch Freeganj Ujjain')}
@@ -465,7 +407,6 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
 
               <tr>
                 <td style={{ border: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
-                  {/* Show IFSC only for non-state clients or only once for state clients */}
                   {client.type === 'state' ? 
                     (client.type === 'private' && adDetails.commission > 0 ?
                       (adDetails.colorCharge > 0 ? 'IFSC - BKID0009101' : 'A/c No. : 910130110002710') :
@@ -483,11 +424,10 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
               </tr>
               <tr>
                 <td style={{ border: '1px solid #000', padding: '5px', borderTop: 'none' }}>
-                  {/* Only show IFSC here if it wasn't shown in the previous row for state clients */}
                   {client.type === 'state' ?
                     (client.type === 'private' && adDetails.commission > 0 ? 
                       (adDetails.colorCharge > 0 ? '' : 'IFSC - BKID0009101') : 
-                      '') :  // Empty for state clients since IFSC is shown in previous row
+                      '') :
                     (client.type === 'private' && adDetails.commission > 0 ? 
                       'IFSC - BKID0009101' : 
                       'IFSC - BKID0009101')}

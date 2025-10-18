@@ -16,9 +16,13 @@ const UploadPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isNotifying, setIsNotifying] = useState(false);
 
+  // New state for preview modal
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
+
   // API URL for email service
   const API_URL = process.env.REACT_APP_API_URL || 'https://api-olbm2m4ljq-uc.a.run.app';
-  
+
   const editions = ['Ujjain', 'Indore'];
   const pageNumbers = Array.from({ length: 8 }, (_, i) => i + 1);
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -26,13 +30,6 @@ const UploadPage = () => {
   // Initialize Firebase Storage
   const storage = getStorage();
 
-  const handleUpload = () => {
-      // Simulate upload process
-      setTimeout(() => {
-          setMessage("Page has been uploaded and sent for review!");
-          alert("Page has been uploaded and sent for review!"); // Show alert
-      }, 1000);
-  };
   // Generate date options: Today, Yesterday, Tomorrow
   const getTodayDate = () => {
     const today = new Date();
@@ -72,14 +69,14 @@ const UploadPage = () => {
     // Initialize with today's date
     const today = getTodayDate();
     setSelectedDate(today); // Set today as default selected date
-    
+
     // Calculate the Monday of current week for weekly view
     const currentDate = new Date();
     const dayOfWeek = currentDate.getDay();
     const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust when day is Sunday
     const monday = new Date(currentDate.setDate(diff));
     setWeekStartDate(formatDate(monday));
-    
+
     // Fetch existing uploads from Firebase
     fetchUploads();
   }, []);
@@ -88,22 +85,22 @@ const UploadPage = () => {
   const fetchUploads = async () => {
     try {
       const newUploadedFiles = {};
-      
+
       if (dateType === 'daily') {
         // Fetch daily papers (today, yesterday, tomorrow)
         const datesToFetch = [getTodayDate(), getYesterdayDate(), getTomorrowDate()];
-        
+
         for (const date of datesToFetch) {
           newUploadedFiles[date] = {};
-          
+
           for (const edition of editions) {
             newUploadedFiles[date][edition] = Array(8).fill(null);
-            
+
             for (let i = 0; i < 8; i++) {
               const pageNum = i + 1;
               const docRef = doc(db, 'pages', `${date}_${edition}_Page${pageNum}`);
               const docSnap = await getDoc(docRef);
-              
+
               if (docSnap.exists()) {
                 const data = docSnap.data();
                 newUploadedFiles[date][edition][i] = {
@@ -122,15 +119,15 @@ const UploadPage = () => {
           for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
             const date = getDateForWeekday(weekStartDate, dayIndex);
             newUploadedFiles[date] = {};
-            
+
             for (const edition of editions) {
               newUploadedFiles[date][edition] = Array(8).fill(null);
-              
+
               for (let i = 0; i < 8; i++) {
                 const pageNum = i + 1;
                 const docRef = doc(db, 'pages', `${date}_${edition}_Page${pageNum}`);
                 const docSnap = await getDoc(docRef);
-                
+
                 if (docSnap.exists()) {
                   const data = docSnap.data();
                   newUploadedFiles[date][edition][i] = {
@@ -145,7 +142,7 @@ const UploadPage = () => {
           }
         }
       }
-      
+
       setUploadedFiles(newUploadedFiles);
     } catch (error) {
       console.error("Error fetching uploads:", error);
@@ -158,7 +155,7 @@ const UploadPage = () => {
     try {
       setIsNotifying(true);
       setMessage("Sending notification to admin...");
-      
+
       // Prepare message for admin
       const subject = `New Page Submission for Review - ${pageData.edition} Edition, Page ${pageData.pageNumber}`;
       const messageText = `
@@ -172,7 +169,7 @@ Submission Time: ${new Date().toLocaleString()}
 Please review the page at your earliest convenience.
 Approve here: nirnayaknews.com/admin
       `;
-      
+
       // Send notification to admin
       const response = await fetch(`${API_URL}/api/notify/review-submission`, {
         method: 'POST',
@@ -189,14 +186,14 @@ Approve here: nirnayaknews.com/admin
           }
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to send notification: ${response.statusText}`);
       }
-      
+
       const result = await response.json();
       console.log("Notification result:", result);
-      
+
       setMessage("Notification sent to admin for review");
     } catch (error) {
       console.error("Error sending notification:", error);
@@ -264,7 +261,7 @@ Approve here: nirnayaknews.com/admin
     // Update the uploaded files state temporarily
     const pageIndex = parseInt(selectedPage, 10) - 1;
     const newUploadedFiles = { ...uploadedFiles };
-    
+
     // Initialize nested objects if they don't exist
     if (!newUploadedFiles[selectedDate]) {
       newUploadedFiles[selectedDate] = {};
@@ -272,7 +269,7 @@ Approve here: nirnayaknews.com/admin
     if (!newUploadedFiles[selectedDate][selectedEdition]) {
       newUploadedFiles[selectedDate][selectedEdition] = Array(8).fill(null);
     }
-    
+
     newUploadedFiles[selectedDate][selectedEdition][pageIndex] = {
       file,
       name: `${selectedDate}_${selectedEdition}_Page${selectedPage}.${file.name.split('.').pop()}`,
@@ -287,16 +284,16 @@ Approve here: nirnayaknews.com/admin
   const uploadToFirebaseStorage = async (file, fileName) => {
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     // Create a reference to the file in Firebase Storage
     const storageRef = ref(storage, `newspaper_pages/${fileName}`);
-    
+
     // Upload the file
     const uploadTask = uploadBytesResumable(storageRef, file);
-    
+
     // Set up progress monitoring
     return new Promise((resolve, reject) => {
-      uploadTask.on('state_changed', 
+      uploadTask.on('state_changed',
         (snapshot) => {
           // Track upload progress
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -332,9 +329,10 @@ Approve here: nirnayaknews.com/admin
     });
   };
 
-  const handleReviewClick = async (date, edition, pageNum) => {
+  // Handle review click - now opens preview modal
+  const handleReviewClick = (date, edition, pageNum) => {
     const pageIndex = pageNum - 1;
-    
+
     // Safely access nested object
     const fileInfo = uploadedFiles[date]?.[edition]?.[pageIndex];
 
@@ -343,18 +341,39 @@ Approve here: nirnayaknews.com/admin
       return;
     }
 
+    // Create preview data
+    const previewInfo = {
+      date,
+      edition,
+      pageNum,
+      fileInfo,
+      previewUrl: URL.createObjectURL(fileInfo.file)
+    };
+
+    setPreviewData(previewInfo);
+    setShowPreview(true);
+  };
+
+  // Confirm and proceed with upload
+  const confirmUpload = async () => {
+    if (!previewData) return;
+
+    const { date, edition, pageNum, fileInfo } = previewData;
+    const pageIndex = pageNum - 1;
+
+    setShowPreview(false);
     setMessage('Uploading to Firebase Storage...');
-    
+
     // Create a unique filename
     const fileName = `${date}_${edition}_Page${pageNum}_${Date.now()}.${fileInfo.file.name.split('.').pop()}`;
-    
+
     try {
       // Upload to Firebase Storage
       const url = await uploadToFirebaseStorage(fileInfo.file, fileName);
       if (!url) return;
 
       setMessage('Saving to Firebase Firestore...');
-      
+
       // Page data to be saved in Firestore and sent in notification
       const pageData = {
         name: fileInfo.name,
@@ -366,7 +385,7 @@ Approve here: nirnayaknews.com/admin
         pageNumber: pageNum,
         storagePath: `newspaper_pages/${fileName}`
       };
-      
+
       // Save to Firebase Firestore
       const docRef = doc(db, 'pages', `${date}_${edition}_Page${pageNum}`);
       await setDoc(docRef, pageData);
@@ -375,7 +394,7 @@ Approve here: nirnayaknews.com/admin
       const newUploadedFiles = { ...uploadedFiles };
       if (!newUploadedFiles[date]) newUploadedFiles[date] = {};
       if (!newUploadedFiles[date][edition]) newUploadedFiles[date][edition] = Array(8).fill(null);
-      
+
       newUploadedFiles[date][edition][pageIndex] = {
         ...fileInfo,
         url: url,
@@ -383,21 +402,36 @@ Approve here: nirnayaknews.com/admin
         uploaded: new Date().toLocaleString()
       };
       setUploadedFiles(newUploadedFiles);
-      
+
       // Send email notification
       await sendPageSubmissionNotification(pageData);
-      
+
       // Reset the selected page after successful upload
       setSelectedPage('');
-      
+
       setMessage(`${fileInfo.name} uploaded successfully and is now in review. Admin has been notified.`);
-      window.location.reload();
-      alert("Page has been uploaded and sent for review!"); 
+
+      // Clean up preview URL
+      if (previewData.previewUrl) {
+        URL.revokeObjectURL(previewData.previewUrl);
+      }
+      setPreviewData(null);
+
+      alert("Page has been uploaded and sent for review!");
 
     } catch (error) {
       console.error('Error in upload process:', error);
       setMessage(`Failed to upload: ${error.message}. Please try again.`);
     }
+  };
+
+  // Cancel preview
+  const cancelPreview = () => {
+    if (previewData && previewData.previewUrl) {
+      URL.revokeObjectURL(previewData.previewUrl);
+    }
+    setPreviewData(null);
+    setShowPreview(false);
   };
 
   const pageIsCommon = (pageNum) => {
@@ -418,11 +452,11 @@ Approve here: nirnayaknews.com/admin
   // Check if a page is available for upload
   const isPageAvailableForUpload = (date, edition, pageNum) => {
     if (!date || !edition) return false;
-    
+
     const pageIndex = pageNum - 1;
     // Safely access nested objects
     const fileInfo = uploadedFiles[date]?.[edition]?.[pageIndex];
-    
+
     // Page is available if:
     // 1. No file has been uploaded yet
     // 2. Previous upload was rejected
@@ -445,9 +479,9 @@ Approve here: nirnayaknews.com/admin
         <>
           <div className="form-group">
             <label>Select Week Starting:</label>
-            <input 
-              type="date" 
-              value={weekStartDate} 
+            <input
+              type="date"
+              value={weekStartDate}
               onChange={handleWeekChange}
             />
           </div>
@@ -472,8 +506,8 @@ Approve here: nirnayaknews.com/admin
 
   const renderPageItem = (date, edition, pageNum, fileInfo, isCommon) => {
     return (
-      <div 
-        key={pageNum} 
+      <div
+        key={pageNum}
         className={`page-item ${isCommon ? 'common-page' : 'unique-page'} ${fileInfo ? 'uploaded' : 'pending'}`}
       >
         <div className="page-number">
@@ -492,15 +526,15 @@ Approve here: nirnayaknews.com/admin
             'Not uploaded'
           )}
         </div>
-        <button 
+        <button
           className="common-tag"
           onClick={() => handleReviewClick(date, edition, pageNum)}
           disabled={isUploading || isNotifying || !fileInfo || fileInfo.status === 'accepted' || fileInfo.status === 'review' || !fileInfo.file}
         >
-          {(isUploading || isNotifying) && date === selectedDate && edition === selectedEdition && pageNum === parseInt(selectedPage) ? 
-            (isUploading ? 'Uploading...' : 'Notifying...') : 
-            fileInfo && fileInfo.status === 'accepted' ? 'Accepted' : 
-            fileInfo && fileInfo.status === 'review' ? 'In Review' : 'Review'}
+          {(isUploading || isNotifying) && date === selectedDate && edition === selectedEdition && pageNum === parseInt(selectedPage) ?
+            (isUploading ? 'Uploading...' : 'Notifying...') :
+            fileInfo && fileInfo.status === 'accepted' ? 'Accepted' :
+              fileInfo && fileInfo.status === 'review' ? 'In Review' : 'Review'}
         </button>
       </div>
     );
@@ -511,7 +545,7 @@ Approve here: nirnayaknews.com/admin
     if (!selectedDate) {
       return <div className="no-data">Please select a date to view uploads</div>;
     }
-    
+
     // Ensure we have data for the selected date
     if (!uploadedFiles[selectedDate]) {
       return <div className="no-data">No uploads found for {formatDisplayDate(selectedDate)}</div>;
@@ -538,11 +572,82 @@ Approve here: nirnayaknews.com/admin
       </div>
     );
   };
-  
+
+  // Preview Modal Component
+  const PreviewModal = () => {
+    if (!showPreview || !previewData) return null;
+
+    const { date, edition, pageNum, fileInfo, previewUrl } = previewData;
+    const fileType = fileInfo.file.type;
+    const isPDF = fileType === 'application/pdf';
+    const isImage = fileType.startsWith('image/');
+
+    return (
+      <div className="preview-modal-overlay">
+        <div className="preview-modal">
+          <div className="preview-header">
+            <h3>Review Page Before Upload</h3>
+            <button className="close-button" onClick={cancelPreview}>×</button>
+          </div>
+
+          <div className="preview-info">
+            <p><strong>Date:</strong> {formatDisplayDate(date)}</p>
+            <p><strong>Edition:</strong> {edition}</p>
+            <p><strong>Page Number:</strong> {pageNum}</p>
+            <p><strong>File:</strong> {fileInfo.file.name}</p>
+          </div>
+
+          <div className="preview-content">
+            {isPDF ? (
+              <div className="pdf-preview">
+                <embed
+                  src={previewUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="500px"
+                />
+              </div>
+            ) : isImage ? (
+              <div className="image-preview">
+                <img
+                  src={previewUrl}
+                  alt={`Page ${pageNum} preview`}
+                  style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                />
+              </div>
+            ) : (
+              <div className="unsupported-preview">
+                <p>Preview not available for this file type.</p>
+                <p>File: {fileInfo.file.name}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="preview-actions">
+            <button
+              className="cancel-button"
+              onClick={cancelPreview}
+              disabled={isUploading || isNotifying}
+            >
+              Cancel
+            </button>
+            <button
+              className="confirm-button"
+              onClick={confirmUpload}
+              disabled={isUploading || isNotifying}
+            >
+              {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : 'Confirm & Send for Review'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="upload-page-container">
       <h2>Upload Newspaper Pages</h2>
-      
+
       <div className="upload-section">
         <div className="form-group">
           <label>Select Paper Type:</label>
@@ -551,13 +656,13 @@ Approve here: nirnayaknews.com/admin
             <option value="weekly">Weekly Papers</option>
           </select>
         </div>
-        
+
         {getDateOptions()}
-        
+
         <div className="form-group">
           <label>Select Edition:</label>
-          <select 
-            value={selectedEdition} 
+          <select
+            value={selectedEdition}
             onChange={handleEditionChange}
             disabled={!selectedDate}
           >
@@ -567,37 +672,37 @@ Approve here: nirnayaknews.com/admin
             ))}
           </select>
         </div>
-        
+
         <div className="form-group">
           <label>Select Page Number:</label>
-          <select 
-            value={selectedPage} 
+          <select
+            value={selectedPage}
             onChange={handlePageChange}
             disabled={!selectedEdition || !selectedDate}
           >
             <option value="">-- Select Page --</option>
             {pageNumbers.map(num => {
               const isAvailable = isPageAvailableForUpload(selectedDate, selectedEdition, num);
-              const status = selectedDate && selectedEdition ? 
-                (uploadedFiles[selectedDate]?.[selectedEdition]?.[num-1]?.status || 'available') : 
+              const status = selectedDate && selectedEdition ?
+                (uploadedFiles[selectedDate]?.[selectedEdition]?.[num - 1]?.status || 'available') :
                 'available';
-              
+
               return (
-                <option 
-                  key={num} 
+                <option
+                  key={num}
                   value={num}
                   disabled={!isAvailable}
                   style={{ color: isAvailable ? 'black' : '#aaa' }}
                 >
-                  Page {num} {num !== 1 && num !== 8 ? '(Common)' : '(Unique)'} 
-                  {status === 'review' ? ' - In Review' : 
-                   status === 'accepted' ? ' - Accepted' : ''}
+                  Page {num} {num !== 1 && num !== 8 ? '(Common)' : '(Unique)'}
+                  {status === 'review' ? ' - In Review' :
+                    status === 'accepted' ? ' - Accepted' : ''}
                 </option>
               );
             })}
           </select>
         </div>
-        
+
         <div className="form-group">
           <label>Upload File (PDF, JPG, PNG):</label>
           <input
@@ -607,9 +712,9 @@ Approve here: nirnayaknews.com/admin
             disabled={!selectedEdition || !selectedPage || !selectedDate || isUploading || isNotifying || !isPageAvailableForUpload(selectedDate, selectedEdition, selectedPage)}
           />
         </div>
-        
+
         {message && <div className="message">{message}</div>}
-        
+
         {isUploading && (
           <div className="progress-bar-container">
             <div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div>
@@ -617,8 +722,11 @@ Approve here: nirnayaknews.com/admin
           </div>
         )}
       </div>
-      
+
       {renderUploadSummary()}
+
+      {/* Preview Modal */}
+      <PreviewModal />
     </div>
   );
 };
