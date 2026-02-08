@@ -278,7 +278,24 @@ Approve here: nirnayaknews.com/admin
     };
 
     setUploadedFiles(newUploadedFiles);
-    setMessage(`${file.name} selected successfully. Click "Review" to upload.`);
+    setMessage(`${file.name} selected successfully. Review the preview below.`);
+
+    // IMMEDIATELY SHOW PREVIEW after file selection
+    const previewInfo = {
+      date: selectedDate,
+      edition: selectedEdition,
+      pageNum: parseInt(selectedPage, 10),
+      fileInfo: {
+        file,
+        name: `${selectedDate}_${selectedEdition}_Page${selectedPage}.${file.name.split('.').pop()}`,
+        status: 'selected',
+        uploaded: new Date().toLocaleString()
+      },
+      previewUrl: URL.createObjectURL(file)
+    };
+
+    setPreviewData(previewInfo);
+    setShowPreview(true);
   };
 
   const uploadToFirebaseStorage = async (file, fileName) => {
@@ -432,6 +449,7 @@ Approve here: nirnayaknews.com/admin
     }
     setPreviewData(null);
     setShowPreview(false);
+    setMessage('Upload cancelled. Please select a file again if needed.');
   };
 
   const pageIsCommon = (pageNum) => {
@@ -606,6 +624,9 @@ Approve here: nirnayaknews.com/admin
                   width="100%"
                   height="500px"
                 />
+                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                  📄 Preview your PDF above. Make sure this is the correct page before uploading.
+                </p>
               </div>
             ) : isImage ? (
               <div className="image-preview">
@@ -614,6 +635,9 @@ Approve here: nirnayaknews.com/admin
                   alt={`Page ${pageNum} preview`}
                   style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
                 />
+                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                  🖼️ Preview your image above. Make sure this is the correct page before uploading.
+                </p>
               </div>
             ) : (
               <div className="unsupported-preview">
@@ -629,14 +653,14 @@ Approve here: nirnayaknews.com/admin
               onClick={cancelPreview}
               disabled={isUploading || isNotifying}
             >
-              Cancel
+              ❌ Cancel (Wrong File)
             </button>
             <button
               className="confirm-button"
               onClick={confirmUpload}
               disabled={isUploading || isNotifying}
             >
-              {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : 'Confirm & Send for Review'}
+              {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : '✅ Confirm & Send for Review'}
             </button>
           </div>
         </div>
@@ -711,6 +735,9 @@ Approve here: nirnayaknews.com/admin
             onChange={handleFileChange}
             disabled={!selectedEdition || !selectedPage || !selectedDate || isUploading || isNotifying || !isPageAvailableForUpload(selectedDate, selectedEdition, selectedPage)}
           />
+          <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+            💡 A preview will appear immediately after selecting a file
+          </p>
         </div>
 
         {message && <div className="message">{message}</div>}

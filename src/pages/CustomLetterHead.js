@@ -167,7 +167,7 @@ const HindiLetterhead = () => {
     };
   }, []);
 
-  // दस्तावेज़ को PDF के रूप में निर्यात करें - ENHANCED RESPONSIVE VERSION
+  // दस्तावेज़ को PDF के रूप में निर्यात करें - MOBILE & DESKTOP COMPATIBLE VERSION
   const exportToPDF = async () => {
     if (!documentTitle.trim() || !documentContent.trim()) {
       setSavedMessage('कृपया शीर्षक और सामग्री दर्ज करें');
@@ -178,136 +178,253 @@ const HindiLetterhead = () => {
     try {
       setIsLoading(true);
       
-      // Create a new div for PDF rendering that's not affected by device viewport
+      // Create a completely isolated container for PDF rendering
       const printContainer = document.createElement('div');
-      printContainer.style.width = '210mm'; // Fixed A4 width
-      printContainer.style.position = 'absolute';
-      printContainer.style.left = '-9999px';
-      printContainer.style.top = '-9999px';
+      printContainer.style.cssText = `
+        position: absolute;
+        left: -99999px;
+        top: 0;
+        width: 794px;
+        background: white;
+        font-family: 'Noto Sans Devanagari', Arial, sans-serif;
+      `;
       document.body.appendChild(printContainer);
       
       // Clone the letterhead for PDF generation
       const clonedElement = letterheadRef.current.cloneNode(true);
       printContainer.appendChild(clonedElement);
       
-      // Force A4 fixed layout in print mode regardless of device
-      clonedElement.style.width = '210mm';
-      clonedElement.style.margin = '0';
-      clonedElement.style.padding = '20mm 15mm'; // Standard A4 margins
-      clonedElement.style.boxSizing = 'border-box';
-      clonedElement.style.height = 'auto';
-      clonedElement.style.minHeight = '297mm'; // A4 height
-      clonedElement.style.fontSize = '12pt'; // Standard document font size
-      clonedElement.style.backgroundColor = 'white';
+      // Remove any responsive classes that might interfere
+      clonedElement.classList.remove('responsive-letterhead');
       
-      // Ensure proper layout for header section - critically important for mobile/responsive fixes
+      // Force desktop A4 layout - CRITICAL for mobile compatibility
+      clonedElement.style.cssText = `
+        width: 794px !important;
+        min-width: 794px !important;
+        max-width: 794px !important;
+        margin: 0 !important;
+        padding: 60px 50px !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+        color: #000 !important;
+        overflow: visible !important;
+      `;
+      
+      // Fix header layout - CRITICAL for mobile
       const headerTop = clonedElement.querySelector('.letterhead-top');
-      const headerLeft = clonedElement.querySelector('.letterhead-left');
-      const headerAddress = clonedElement.querySelector('.letterhead-address');
-      const letterheadLogo = clonedElement.querySelector('.letterhead-logo');
-      const letterheadTagline = clonedElement.querySelector('.letterhead-tagline');
-      
-      // Force fixed layout for header section
       if (headerTop) {
-        headerTop.style.display = 'flex';
-        headerTop.style.flexDirection = 'row';
-        headerTop.style.justifyContent = 'space-between';
-        headerTop.style.width = '100%';
-        headerTop.style.flexWrap = 'nowrap';
-        headerTop.style.alignItems = 'flex-start';
+        headerTop.style.cssText = `
+          display: flex !important;
+          flex-direction: row !important;
+          justify-content: space-between !important;
+          align-items: flex-start !important;
+          width: 100% !important;
+          flex-wrap: nowrap !important;
+          gap: 20px !important;
+        `;
       }
       
-      // Control left section (logo + tagline) width
+      // Fix left section (logo + tagline)
+      const headerLeft = clonedElement.querySelector('.letterhead-left');
       if (headerLeft) {
-        headerLeft.style.flex = '0 0 50%'; // Fixed width, no grow, no shrink
-        headerLeft.style.maxWidth = '50%';
-        headerLeft.style.display = 'block';
-        headerLeft.style.boxSizing = 'border-box';
+        headerLeft.style.cssText = `
+          flex: 0 0 48% !important;
+          max-width: 48% !important;
+          width: 48% !important;
+          display: block !important;
+        `;
       }
       
-      // Control logo size
-      if (letterheadLogo) {
-        letterheadLogo.style.maxWidth = '100%';
+      // Fix tagline
+      const letterheadTagline = clonedElement.querySelector('.letterhead-tagline');
+      if (letterheadTagline) {
+        letterheadTagline.style.cssText = `
+          width: 100% !important;
+          font-size: 10px !important;
+          line-height: 1.3 !important;
+          margin-bottom: 10px !important;
+        `;
         
-        // Ensure logo image is properly sized
+        // Fix tagline paragraphs
+        const taglinePs = letterheadTagline.querySelectorAll('p');
+        taglinePs.forEach(p => {
+          p.style.cssText = `
+            margin: 0 0 3px 0 !important;
+            padding: 0 !important;
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+          `;
+        });
+      }
+      
+      // Fix logo
+      const letterheadLogo = clonedElement.querySelector('.letterhead-logo');
+      if (letterheadLogo) {
+        letterheadLogo.style.cssText = `
+          width: 100% !important;
+          max-width: 100% !important;
+          text-align: left !important;
+        `;
+        
         const logoImg = letterheadLogo.querySelector('img');
         if (logoImg) {
-          logoImg.style.maxWidth = '90%';
-          logoImg.style.height = 'auto';
+          logoImg.style.cssText = `
+            width: auto !important;
+            max-width: 85% !important;
+            height: auto !important;
+            display: block !important;
+          `;
         }
       }
       
-      // Control tagline size
-      if (letterheadTagline) {
-        letterheadTagline.style.width = '100%';
-        letterheadTagline.style.fontSize = '9pt';
-        letterheadTagline.style.lineHeight = '1.2';
-      }
-      
-      // Control address section width
+      // Fix address section
+      const headerAddress = clonedElement.querySelector('.letterhead-address');
       if (headerAddress) {
-        headerAddress.style.flex = '0 0 50%'; // Fixed width, no grow, no shrink
-        headerAddress.style.maxWidth = '50%';
-        headerAddress.style.textAlign = 'right';
-        headerAddress.style.fontSize = '9pt';
-        headerAddress.style.lineHeight = '1.2';
+        headerAddress.style.cssText = `
+          flex: 0 0 48% !important;
+          max-width: 48% !important;
+          width: 48% !important;
+          text-align: right !important;
+          font-size: 10px !important;
+          line-height: 1.3 !important;
+        `;
+        
+        const addressPs = headerAddress.querySelectorAll('p');
+        addressPs.forEach(p => {
+          p.style.cssText = `
+            margin: 0 0 3px 0 !important;
+            padding: 0 !important;
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+            text-align: right !important;
+          `;
+        });
       }
       
-      // Ensure consistent font sizes for all content
+      // Fix divider
+      const divider = clonedElement.querySelector('.letterhead-divider');
+      if (divider) {
+        divider.style.cssText = `
+          width: 100% !important;
+          height: 2px !important;
+          background: #000 !important;
+          margin: 15px 0 !important;
+        `;
+      }
+      
+      // Fix content area
       const contentArea = clonedElement.querySelector('.letterhead-content');
       if (contentArea) {
-        contentArea.style.fontSize = '12pt';
-        contentArea.style.lineHeight = '1.5';
+        contentArea.style.cssText = `
+          font-size: 14px !important;
+          line-height: 1.6 !important;
+          width: 100% !important;
+        `;
       }
       
-      // Set all paragraphs to consistent font sizes
+      // Fix content header (receiver + date)
+      const contentHeader = clonedElement.querySelector('.content-header');
+      if (contentHeader) {
+        contentHeader.style.cssText = `
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: flex-start !important;
+          margin-bottom: 20px !important;
+        `;
+      }
+      
+      // Fix receiver address
+      const receiverAddress = clonedElement.querySelector('.receiver-address');
+      if (receiverAddress) {
+        receiverAddress.style.cssText = `
+          flex: 1 !important;
+          font-size: 14px !important;
+        `;
+      }
+      
+      // Fix date
+      const dateEl = clonedElement.querySelector('.date');
+      if (dateEl) {
+        dateEl.style.cssText = `
+          text-align: right !important;
+          font-size: 14px !important;
+        `;
+      }
+      
+      // Fix subject line
+      const subjectLine = clonedElement.querySelector('.subject-line');
+      if (subjectLine) {
+        subjectLine.style.cssText = `
+          font-size: 14px !important;
+          font-weight: bold !important;
+          margin: 15px 0 !important;
+          word-wrap: break-word !important;
+        `;
+      }
+      
+      // Fix all paragraphs
       const allParagraphs = clonedElement.querySelectorAll('p');
       allParagraphs.forEach(p => {
-        // Address paragraphs get smaller font
-        if (p.closest('.letterhead-address') || p.closest('.letterhead-tagline')) {
-          p.style.fontSize = '9pt';
-          p.style.margin = '0';
-          p.style.padding = '0';
-          p.style.lineHeight = '1.2';
-        } else {
-          p.style.fontSize = '12pt';
-          p.style.lineHeight = '1.5';
+        if (!p.closest('.letterhead-address') && !p.closest('.letterhead-tagline')) {
+          p.style.cssText = `
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+            margin: 8px 0 !important;
+            padding: 0 !important;
+          `;
         }
       });
       
-      // Allow browser to render the cloned element
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Fix signature section
+      const signatureSection = clonedElement.querySelector('.signature-section');
+      if (signatureSection) {
+        signatureSection.style.cssText = `
+          margin-top: 40px !important;
+          text-align: left !important;
+        `;
+      }
       
-      // Create canvas from the cloned element with fixed dimensions
+      const signatureName = clonedElement.querySelector('.signature-name');
+      if (signatureName) {
+        signatureName.style.cssText = `
+          font-size: 14px !important;
+          margin-top: 5px !important;
+        `;
+      }
+      
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Create canvas with fixed dimensions
       const canvas = await html2canvas(clonedElement, {
-        scale: 2, // Increased resolution for better quality
+        scale: 2.5,
         useCORS: true,
         allowTaint: true,
-        width: 794, // A4 width in pixels (72dpi)
-        height: 1123, // A4 height in pixels (72dpi)
         logging: false,
+        width: 794,
         windowWidth: 794,
-        windowHeight: 1123
+        backgroundColor: '#ffffff'
       });
       
-      // Clean up temporary elements
+      // Clean up
       document.body.removeChild(printContainer);
       
-      // Convert canvas to image
-      const imgData = canvas.toDataURL('image/png');
+      // Convert to image
+      const imgData = canvas.toDataURL('image/png', 1.0);
       
-      // Create PDF with fixed A4 dimensions
+      // Create PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
+        unit: 'px',
+        format: [794, 1123]
       });
       
-      // Add image to PDF with precise positioning
-      const imgWidth = 210; // A4 width
-      const imgHeight = 297; // A4 height
+      const imgWidth = 794;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
       
       // Save PDF
       pdf.save(`Letter-${formatDate(selectedDate).replace(/\s/g, '-')}.pdf`);

@@ -192,6 +192,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
         roNumber: adDetails.roNumber,
         roDate: adDetails.roDate,
         publicationDate: adDetails.publicationDate,
+        billingDate: adDetails.billingDate,
         pdfUrl: pdfUrl,
         basePrice: adDetails.basePrice,
         finalPrice: adDetails.finalPrice,
@@ -262,6 +263,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
           <div className="particulars-content">
             <div className="particulars-column">
               <p>Bill No:</p>
+              <p>Billing Date:</p>
               <p>RO Number:</p>
               <p>Size:</p>
               <p>Name of the Department/Client:</p>
@@ -270,6 +272,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
             </div>
             <div className="particulars-column">
               <p>{adDetails.invoiceId || '213'}</p>
+              <p>{adDetails.billingDate ? formatDate(adDetails.billingDate) : formatDate(new Date())}</p>
               <p>{adDetails.roNumber || '-'}</p>
               <p>{dimensions.displayArea} cm²</p>
               <p>{client.name || '-'}</p>
@@ -308,7 +311,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
             </thead>
             <tbody>
               <tr>
-                <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: 'none' }}>उपरोक्त आदेश के तहत विज्ञापन का प्रकाश</td>
+                <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>उपरोक्त आदेश के तहत विज्ञापन का प्रकाश</td>
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>1</td>
                 <td style={{ border: '1px solid #000', padding: '5px' }}>Publication Charges</td>
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{dimensions.displayLength}</td>
@@ -322,7 +325,7 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
 
               {adDetails.colorCharge > 0 && (
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>Our Bank Detail -</td>
+                  <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>Our Bank Detail -</td>
                   <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>2</td>
                   <td style={{ border: '1px solid #000', padding: '5px' }}>Color Charges (+40%)</td>
                   <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }} colSpan="4"></td>
@@ -331,8 +334,8 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
               )}
 
               <tr>
-                <td style={{ border: '1px solid #000', padding: '5px', borderTop: adDetails.colorCharge > 0 ? 'none' : '1px solid #000', borderBottom: '1px solid #000' }}>
-                  {adDetails.colorCharge > 0 ? 'Bank Name - Bank of India' : 'Our Bank Detail -'}
+                <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
+                  {adDetails.colorCharge > 0 ? `Bank Name - ${adDetails.bankName === 'yes' ? 'YES Bank' : 'Bank of India'}` : 'Our Bank Detail -'}
                 </td>
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{adDetails.colorCharge > 0 ? '3' : '2'}</td>
                 <td style={{ border: '1px solid #000', padding: '5px' }}>Total Charge</td>
@@ -342,8 +345,8 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
 
               {client.type === 'private' && adDetails.commission > 0 && (
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: '1px solid #000' }}>
-                    {adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India'}
+                  <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
+                    {adDetails.colorCharge > 0 ? 'Branch Ujjain' : `Bank Name - ${adDetails.bankName === 'yes' ? 'YES Bank' : 'Bank of India'}`}
                   </td>
                   <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{adDetails.colorCharge > 0 ? '4' : '3'}</td>
                   <td style={{ border: '1px solid #000', padding: '5px' }}>Less Discount (15%)</td>
@@ -355,10 +358,10 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
               {client.type === 'state' ? (
                 <>
                   <tr>
-                    <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: '1px solid #000' }}>
+                    <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
                       {client.type === 'private' && adDetails.commission > 0 ? 
-                        (adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India') : 
-                        (adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India')}
+                        (adDetails.colorCharge > 0 ? 'Branch Ujjain' : `Bank Name - ${adDetails.bankName === 'yes' ? 'YES Bank' : 'Bank of India'}`) : 
+                        (adDetails.colorCharge > 0 ? 'Branch Ujjain' : `Bank Name - ${adDetails.bankName === 'yes' ? 'YES Bank' : 'Bank of India'}`)}
                     </td>
                     <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>
                       {adDetails.colorCharge > 0 ?
@@ -370,10 +373,10 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                     <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right' }}>{(adDetails.gstAmount / 2).toFixed(2)}</td>
                   </tr>
                   <tr>
-                    <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: '1px solid #000' }}>
+                    <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
                       {client.type === 'private' && adDetails.commission > 0 ?
-                        (adDetails.colorCharge > 0 ? 'A/c No. : 910130110002710' : 'Branch Freeganj Ujjain') :
-                        (adDetails.colorCharge > 0 ? 'A/c No. : 910130110002710' : 'Branch Freeganj Ujjain')}
+                        (adDetails.colorCharge > 0 ? `A/c No. : ${adDetails.bankName === 'yes' ? '038163400001108' : '910130110002710'}` : 'Branch Ujjain') :
+                        (adDetails.colorCharge > 0 ? `A/c No. : ${adDetails.bankName === 'yes' ? '038163400001108' : '910130110002710'}` : 'Branch Ujjain')}
                     </td>
                     <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>
                       {adDetails.colorCharge > 0 ?
@@ -387,10 +390,10 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                 </>
               ) : (
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '5px', borderTop: '1px solid #000', borderBottom: '1px solid #000' }}>
+                  <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
                     {client.type === 'private' && adDetails.commission > 0 ?
-                      (adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India') :
-                      (adDetails.colorCharge > 0 ? 'Branch Freeganj Ujjain' : 'Bank Name - Bank of India')}
+                      (adDetails.colorCharge > 0 ? 'Branch Ujjain' : `Bank Name - ${adDetails.bankName === 'yes' ? 'YES Bank' : 'Bank of India'}`) :
+                      (adDetails.colorCharge > 0 ? 'Branch Ujjain' : `Bank Name - ${adDetails.bankName === 'yes' ? 'YES Bank' : 'Bank of India'}`)}
                   </td>
                   <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>
                     {adDetails.colorCharge > 0 ?
@@ -406,14 +409,14 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
               )}
 
               <tr>
-                <td style={{ border: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
+                <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '5px', borderTop: 'none', borderBottom: 'none' }}>
                   {client.type === 'state' ? 
                     (client.type === 'private' && adDetails.commission > 0 ?
-                      (adDetails.colorCharge > 0 ? 'IFSC - BKID0009101' : 'A/c No. : 910130110002710') :
-                      (adDetails.colorCharge > 0 ? 'IFSC - BKID0009101' : 'A/c No. : 910130110002710')) :
+                      (adDetails.colorCharge > 0 ? `IFSC - ${adDetails.bankName === 'yes' ? 'YESB0000381' : 'BKID0009101'}` : `A/c No. : ${adDetails.bankName === 'yes' ? '038163400001108' : '910130110002710'}`) :
+                      (adDetails.colorCharge > 0 ? `IFSC - ${adDetails.bankName === 'yes' ? 'YESB0000381' : 'BKID0009101'}` : `A/c No. : ${adDetails.bankName === 'yes' ? '038163400001108' : '910130110002710'}`)) :
                     (client.type === 'private' && adDetails.commission > 0 ?
-                      (adDetails.colorCharge > 0 ? 'A/c No. : 910130110002710' : 'Branch Freeganj Ujjain') :
-                      (adDetails.colorCharge > 0 ? 'A/c No. : 910130110002710' : 'Branch Freeganj Ujjain'))}
+                      (adDetails.colorCharge > 0 ? `A/c No. : ${adDetails.bankName === 'yes' ? '038163400001108' : '910130110002710'}` : 'Branch Ujjain') :
+                      (adDetails.colorCharge > 0 ? `A/c No. : ${adDetails.bankName === 'yes' ? '038163400001108' : '910130110002710'}` : 'Branch Ujjain'))}
                 </td>
                 <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }} colSpan="6">
                   <strong>Grand Total</strong>
@@ -423,20 +426,14 @@ const NewspaperInvoiceGenerator = ({ client, adDetails }) => {
                 </td>
               </tr>
               <tr>
-                <td style={{ border: '1px solid #000', padding: '5px', borderTop: 'none' }}>
-                  {client.type === 'state' ?
-                    (client.type === 'private' && adDetails.commission > 0 ? 
-                      (adDetails.colorCharge > 0 ? '' : 'IFSC - BKID0009101') : 
-                      '') :
-                    (client.type === 'private' && adDetails.commission > 0 ? 
-                      'IFSC - BKID0009101' : 
-                      'IFSC - BKID0009101')}
+                <td style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '5px', borderTop: 'none' }}>
+                  {`IFSC - ${adDetails.bankName === 'yes' ? 'YESB0000381' : 'BKID0009101'}`}
                 </td>
-                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'left', fontStyle: 'italic' }} colSpan="6">
-                  Total in Rupees:
-                </td>
-                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontStyle: 'italic' }}>
-                  {convertToWords(adDetails.finalPrice || 0)}
+                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'left', fontStyle: 'italic' }} colSpan="7">
+                  <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <span style={{ marginRight: '10px', minWidth: 'fit-content', whiteSpace: 'nowrap' }}>Total in Rupees:</span>
+                    <span style={{ flex: 1, wordBreak: 'break-word' }}>{convertToWords(adDetails.finalPrice || 0)}</span>
+                  </div>
                 </td>
               </tr>
             </tbody>

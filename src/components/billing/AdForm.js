@@ -16,12 +16,11 @@ const AdForm = ({ client, onSubmit }) => {
     roNumber: '', // RO number field
     roDate: '', // No default date now
     publicationDate: '', // NEW: Publication date field
+    billingDate: new Date().toISOString().split('T')[0], // Billing date - today's date by default
     city: 'indore', // Default city selection
-    billNumber: '' // Added user input bill number field
+    billNumber: '', // Added user input bill number field
+    bankName: 'boi' // Default to Bank of India
   });
-
-  // Track which input method was used first (area or dimensions)
-  const [inputMethod, setInputMethod] = useState(null); // 'area' or 'dimensions'
 
   // City information mapping
   const cityInfo = {
@@ -36,6 +35,22 @@ const AdForm = ({ client, onSubmit }) => {
       phone: '07344060666 / Mob.: 9424560111',
       email: 'nirnayak.news@gmail.com',
       dprCode: '0910'
+    }
+  };
+
+  // Bank information mapping
+  const bankInfo = {
+    boi: {
+      name: 'Bank of India',
+      accountNumber: '910130110002710',
+      ifsc: 'BKID0009101',
+      branch: 'Freeganj Ujjain'
+    },
+    yes: {
+      name: 'YES Bank',
+      accountNumber: '038163400001108',
+      ifsc: 'YESB0000381',
+      branch: 'Ujjain'
     }
   };
 
@@ -93,22 +108,6 @@ const AdForm = ({ client, onSubmit }) => {
     }
   };
 
-  // Calculate dimensions based on area
-  const calculateDimensionsFromArea = (area) => {
-    // Default to a square if no existing dimensions
-    if (!formData.adLength || !formData.adBreadth) {
-      const side = Math.sqrt(area);
-      return { length: side.toFixed(2), breadth: side.toFixed(2) };
-    }
-
-    // Maintain aspect ratio if dimensions exist
-    const currentRatio = parseFloat(formData.adLength) / parseFloat(formData.adBreadth);
-    const newBreadth = Math.sqrt(area / currentRatio);
-    const newLength = area / newBreadth;
-
-    return { length: newLength.toFixed(2), breadth: newBreadth.toFixed(2) };
-  };
-
   // Handle swap of length and breadth
   const handleSwapDimensions = () => {
     setFormData(prevData => ({
@@ -116,114 +115,30 @@ const AdForm = ({ client, onSubmit }) => {
       adLength: prevData.adBreadth,
       adBreadth: prevData.adLength
     }));
-
-    // If area was entered first, this won't change the area
-    // If dimensions were entered first, the area calculation remains the same when swapping
   };
 
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Determine the input method if not already set
-    if (!inputMethod) {
-      if (name === 'adArea') {
-        setInputMethod('area');
-      } else if (name === 'adLength' || name === 'adBreadth') {
-        setInputMethod('dimensions');
-      }
-    }
+    // Standard handling for all fields - no auto-calculation
+    setFormData(prevData => ({ ...prevData, [name]: value }));
 
-    // Handle area input
+    // Update calculated area when adArea field changes
     if (name === 'adArea') {
       const area = parseFloat(value) || 0;
+      setCalculatedArea(area);
 
-      if (area > 0) {
-        // Calculate dimensions as a square or maintain aspect ratio
-        const { length, breadth } = calculateDimensionsFromArea(area);
-
-        setFormData(prevData => ({
-          ...prevData,
-          adArea: value,
-          adLength: length,
-          adBreadth: breadth
-        }));
-
-        setCalculatedArea(area);
-
-        // Update price preview if we have all the needed data
-        if (formData.ratePerSqCm) {
-          updatePricePreview(area);
-        }
-
-        return; // Exit early as we've already updated the form state
+      // Update price preview if we have all the needed data
+      if (formData.ratePerSqCm && area > 0) {
+        updatePricePreview(area);
       }
     }
 
-    // Handle dimension changes based on input method
-    if ((name === 'adLength' || name === 'adBreadth') && inputMethod) {
-      const newValue = parseFloat(value) || 0;
-
-      if (inputMethod === 'area' && formData.adArea) {
-        // If area was entered first, maintain constant area
-        const area = parseFloat(formData.adArea);
-
-        if (area > 0 && newValue > 0) {
-          if (name === 'adLength') {
-            // Calculate new breadth based on constant area and new length
-            const newBreadth = (area / newValue).toFixed(2);
-
-            setFormData(prevData => ({
-              ...prevData,
-              adLength: value,
-              adBreadth: newBreadth
-            }));
-          } else { // name === 'adBreadth'
-            // Calculate new length based on constant area and new breadth
-            const newLength = (area / newValue).toFixed(2);
-
-            setFormData(prevData => ({
-              ...prevData,
-              adBreadth: value,
-              adLength: newLength
-            }));
-          }
-
-          // Update price preview if needed
-          if (formData.ratePerSqCm) {
-            updatePricePreview(area);
-          }
-
-          return; // Exit early as we've already updated the form state
-        }
-      } else if (inputMethod === 'dimensions') {
-        // If dimensions were entered first, recalculate area
-        let newLength = name === 'adLength' ? newValue : parseFloat(formData.adLength) || 0;
-        let newBreadth = name === 'adBreadth' ? newValue : parseFloat(formData.adBreadth) || 0;
-
-        if (newLength > 0 && newBreadth > 0) {
-          const newArea = (newLength * newBreadth).toFixed(2);
-
-          setFormData(prevData => ({
-            ...prevData,
-            [name]: value,
-            adArea: newArea
-          }));
-
-          setCalculatedArea(parseFloat(newArea));
-
-          // Update price preview if needed
-          if (formData.ratePerSqCm) {
-            updatePricePreview(parseFloat(newArea));
-          }
-
-          return; // Exit early as we've already updated the form state
-        }
-      }
+    // Update price preview when rate changes
+    if (name === 'ratePerSqCm' && calculatedArea > 0) {
+      updatePricePreview(calculatedArea);
     }
-
-    // Standard handling for other fields
-    setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
   // Update price preview when rate or color type changes
@@ -260,6 +175,9 @@ const AdForm = ({ client, onSubmit }) => {
       // Get selected city information
       const selectedCityInfo = cityInfo[formData.city];
 
+      // Get selected bank information
+      const selectedBankInfo = bankInfo[formData.bankName];
+
       // Create the data object to save
       const dataToSave = {
         invoiceId: invoiceNumber, // Use the user-provided bill number
@@ -283,8 +201,11 @@ const AdForm = ({ client, onSubmit }) => {
         roNumber: formData.roNumber,
         roDate: formData.roDate,
         publicationDate: formData.publicationDate,
+        billingDate: formData.billingDate,
         city: formData.city,
         cityInfo: selectedCityInfo,
+        bankName: formData.bankName,
+        bankInfo: selectedBankInfo,
         billNumber: formData.billNumber // Store the user-provided bill number
       };
 
@@ -331,6 +252,9 @@ const AdForm = ({ client, onSubmit }) => {
     // Get selected city information
     const selectedCityInfo = cityInfo[formData.city];
 
+    // Get selected bank information
+    const selectedBankInfo = bankInfo[formData.bankName];
+
     // Combine form data with price calculations and city info
     const adDetails = {
       ...formData,
@@ -341,7 +265,9 @@ const AdForm = ({ client, onSubmit }) => {
       roNumber: formData.roNumber,
       roDate: formData.roDate,
       publicationDate: formData.publicationDate,
+      billingDate: formData.billingDate,
       cityInfo: selectedCityInfo,
+      bankInfo: selectedBankInfo,
       billNumber: formData.billNumber // Include the user-provided bill number
     };
 
@@ -416,6 +342,29 @@ const AdForm = ({ client, onSubmit }) => {
         <p><strong>DPR Code:</strong> {cityInfo[formData.city].dprCode}</p>
       </div>
 
+      {/* Bank Selection Dropdown */}
+      <div className="form-group">
+        <label>Bank: <span className="required-field"></span></label>
+        <select
+          name="bankName"
+          value={formData.bankName}
+          onChange={handleChange}
+          required
+          className="form-control"
+        >
+          <option value="boi">Bank of India</option>
+          <option value="yes">YES Bank</option>
+        </select>
+      </div>
+
+      {/* Display selected bank information */}
+      <div className="city-info">
+        <h4>Bank Details ({bankInfo[formData.bankName].name})</h4>
+        <p><strong>Account Number:</strong> {bankInfo[formData.bankName].accountNumber}</p>
+        <p><strong>IFSC Code:</strong> {bankInfo[formData.bankName].ifsc}</p>
+        <p><strong>Branch:</strong> {bankInfo[formData.bankName].branch}</p>
+      </div>
+
       {/* Bill Number and RO Fields Row */}
       <div className="form-row">
         <div className="form-group">
@@ -443,6 +392,19 @@ const AdForm = ({ client, onSubmit }) => {
             placeholder="Enter Release Order Number"
           />
         </div>
+      </div>
+
+      {/* Billing Date Field */}
+      <div className="form-group">
+        <label>Billing Date: <span className="required-field"></span></label>
+        <input
+          type="date"
+          name="billingDate"
+          value={formData.billingDate}
+          onChange={handleChange}
+          required
+          className="form-control"
+        />
       </div>
 
       <div className="form-group">
@@ -680,6 +642,26 @@ const AdForm = ({ client, onSubmit }) => {
           font-weight: bold;
           color: #4a90e2;
           font-size: 16px;
+        }
+
+        .city-info {
+          background: #f9f9f9;
+          padding: 12px;
+          border-radius: 4px;
+          margin-bottom: 15px;
+          border-left: 3px solid #4a90e2;
+        }
+
+        .city-info h4 {
+          margin: 0 0 10px 0;
+          color: #333;
+          font-size: 16px;
+        }
+
+        .city-info p {
+          margin: 5px 0;
+          font-size: 14px;
+          color: #555;
         }
       `}</style>
     </form>

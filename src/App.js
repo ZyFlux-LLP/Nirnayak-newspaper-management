@@ -25,6 +25,7 @@ import AdminSidebar from './components/Sidebar';
 import OperatorsPage from './pages/OperatorsPage';
 import EditOperatorPage from './pages/EditOperatorPage';
 import ApprovedPages from './pages/ApprovedPages';
+import ArchiveAdminPage from './pages/Archiveadminpage';
 
 // Authentication context
 export const AuthContext = React.createContext();
@@ -189,7 +190,7 @@ function AppLayout() {
           <Route path="/approved-pages" element={<ApprovedPages />} />
           <Route path="/adminBilling" element={<ProtectedRoute element={<BillingPage />} requiredRole="admin" />} />
           <Route path="/letterhead" element={<ProtectedRoute element={<LetterheadNotepad />} requiredRole="admin" />} />
-          <Route path="/archiveAdmin" element={<ProtectedRoute element={<ArchivePage />} requiredRole="admin" />} />
+          <Route path="/archiveAdmin" element={<ProtectedRoute element={<ArchiveAdminPage />} requiredRole="admin" />} />
           <Route path="/operators" element={<ProtectedRoute element={<OperatorsPage />} requiredRole="admin" />} />
           <Route path="/operators/edit/:operatorId" element={<ProtectedRoute element={<EditOperatorPage />} requiredRole="admin" />} />
           <Route path="/rate-cards" element={<ProtectedRoute element={<RateCardsPage />} requiredRole="admin" />} />
