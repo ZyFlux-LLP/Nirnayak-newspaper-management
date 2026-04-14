@@ -13,8 +13,8 @@ const app = express();
 
 // Define allowed origins
 const allowedOrigins = [
-  "https://nirnayaknews.com",
-  "https://www.nirnayaknews.com",
+  "https://nirnayaknews.in",
+  "https://www.nirnayaknews.in",
   "http://localhost:3000",
 ];
 

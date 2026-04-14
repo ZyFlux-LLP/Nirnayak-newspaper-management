@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 const sendEmailWithAttachment = async (to, subject, message, attachment) => {
   try {
     const mailOptions = {
-      from: "\"Dainik Nirnayak\" <noreply@nirnayaknews.com>",
+      from: "\"Dainik Nirnayak\" <noreply@nirnayaknews.in>",
       to,
       subject,
       text: message,
@@ -52,7 +52,7 @@ const sendEmailWithAttachment = async (to, subject, message, attachment) => {
 const sendHTMLEmail = async (to, subject, textContent, htmlContent, attachments = []) => {
   try {
     const mailOptions = {
-      from: "\"Dainik Nirnayak\" <noreply@nirnayaknews.com>",
+      from: "\"Dainik Nirnayak\" <noreply@nirnayaknews.in>",
       to,
       subject,
       text: textContent,

@@ -167,7 +167,7 @@ Date: ${formatDisplayDate(pageData.date)}
 Submission Time: ${new Date().toLocaleString()}
 
 Please review the page at your earliest convenience.
-Approve here: nirnayaknews.com/admin
+Approve here: nirnayaknews.in/admin
       `;
 
       // Send notification to admin

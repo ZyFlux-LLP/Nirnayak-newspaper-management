@@ -215,7 +215,7 @@ async function compressPdf(pdfBuffer, compressionLevel = "medium") {
 // Updated CORS configuration for the router
 const corsOptions = {
   origin: function(origin, callback) {
-    const allowedOrigins = ["http://localhost:3000", "https://nirnayaknews.com", "https://www.nirnayaknews.com"];
+    const allowedOrigins = ["http://localhost:3000", "https://nirnayaknews.in", "https://www.nirnayaknews.in"];
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
