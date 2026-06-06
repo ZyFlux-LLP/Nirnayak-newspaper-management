@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc, addDoc } from 'firebase/firestore';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Download, ArrowLeft, CheckCircle, XCircle, Copy, Check, ExternalLink, Maximize, Eye, Send } from 'lucide-react';
+import { PDFDocument } from 'pdf-lib';
 import '../css/Review.css';
 
 // API URL - should be consistent across components
@@ -20,6 +22,7 @@ const Review = () => {
   const [relatedPagesStatus, setRelatedPagesStatus] = useState(null);
   const [isResending, setIsResending] = useState(false);
   const [isApprovingAll, setIsApprovingAll] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
 
   useEffect(() => {
     const fetchPageData = async () => {
@@ -64,6 +67,12 @@ const Review = () => {
       const edition = currentPage.edition;
       const date = currentPage.date;
       const currentPageNumber = parseInt(currentPage.pageNumber);
+
+      // Shikhar Sanket has only 1 page total - no related pages!
+      if (currentPage.newspaper === 'Shikhar Sanket') {
+        setRelatedPagesStatus({});
+        return;
+      }
 
       // Determine which group of pages to check
       let relatedPageNumbers = [];
@@ -146,6 +155,9 @@ const Review = () => {
   const checkAllRelatedPagesApproved = () => {
     if (!relatedPagesStatus) return false;
 
+    // Shikhar Sanket has only 1 page total - no related pages to approve
+    if (pageData && pageData.newspaper === 'Shikhar Sanket') return true;
+
     return Object.values(relatedPagesStatus).every(page =>
       page.exists && page.status === 'accepted'
     );
@@ -154,6 +166,11 @@ const Review = () => {
   // Check if all pages (including current) are approved
   const isEntireGroupApproved = () => {
     if (!pageData || !relatedPagesStatus) return false;
+
+    // Shikhar Sanket has only 1 page total
+    if (pageData.newspaper === 'Shikhar Sanket') {
+      return pageData.status === 'accepted';
+    }
 
     // Check if current page is approved
     const isCurrentPageApproved = pageData.status === 'accepted';
@@ -170,6 +187,11 @@ const Review = () => {
   const hasPendingPagesInGroup = () => {
     if (!pageData || !relatedPagesStatus) return false;
 
+    // Shikhar Sanket has only 1 page total
+    if (pageData.newspaper === 'Shikhar Sanket') {
+      return pageData.status !== 'accepted';
+    }
+
     // Check if current page is not approved
     const isCurrentPagePending = pageData.status !== 'accepted';
 
@@ -183,6 +205,9 @@ const Review = () => {
 
   // Get group name based on page number
   const getGroupName = (pageNumber) => {
+    if (pageData && pageData.newspaper === 'Shikhar Sanket') {
+      return "Full Newspaper";
+    }
     if (pageNumber === 1 || pageNumber === 8) {
       return "Cover Pages (1 & 8)";
     } else {
@@ -204,6 +229,14 @@ const Review = () => {
       // 3. If group is completed, send notification for the entire group
       if (groupCompleted) {
         await sendGroupNotification();
+        
+        // 4. After approval, check if ALL 8 pages for this edition are now approved
+        const all8Approved = await checkAndMergeAll8Pages();
+        if (all8Approved) {
+            navigate('/dashboard', { state: { message: `Page approved, group notification sent, and FINAL NEWSPAPER MERGED!` } });
+            return;
+        }
+
         navigate('/dashboard', { state: { message: `Page approved and ${getGroupName(parseInt(pageData.pageNumber))} group notification sent!` } });
       } else {
         // Just update the page status without sending individual notification
@@ -222,7 +255,9 @@ const Review = () => {
     const currentPageNumber = parseInt(pageData.pageNumber);
     let groupPages = [];
 
-    if (currentPageNumber === 1 || currentPageNumber === 8) {
+    if (pageData.newspaper === 'Shikhar Sanket') {
+      groupPages = [1];
+    } else if (currentPageNumber === 1 || currentPageNumber === 8) {
       // Send notification for Group 1: Pages 1 and 8
       groupPages = [1, 8];
     } else {
@@ -315,7 +350,7 @@ const Review = () => {
   };
 
   // Handle Approve All pages in group
-  const handleApproveAll = async () => {
+  const handleApproveAll = async (sendMail = true) => {
     try {
       setIsApprovingAll(true);
 
@@ -343,7 +378,9 @@ const Review = () => {
       }
 
       // 3. Send group notification since all pages are now approved
-      await sendGroupNotification();
+      if (sendMail) {
+        await sendGroupNotification();
+      }
 
       // 4. Refresh page data to show updated statuses
       const pageRef = doc(db, 'pages', pageId);
@@ -361,7 +398,16 @@ const Review = () => {
         }
       }
 
-      alert("All pages in the group have been approved and notification sent!");
+      // 5. Check if all 8 pages are now approved to trigger the final merge
+      const all8Merged = await checkAndMergeAll8Pages();
+
+      if (all8Merged) {
+        alert("All pages approved! Final newspaper merged, stored, and temporary files deleted.");
+      } else if (sendMail) {
+        alert("All pages in the group have been approved and notification sent!");
+      } else {
+        alert("All pages in the group have been approved and saved in archive without mail!");
+      }
       setTimeout(() => setError(null), 3000);
     } catch (error) {
       console.error("Error approving all pages:", error);
@@ -374,6 +420,11 @@ const Review = () => {
   // Check if this approval completes a group
   const checkGroupCompletion = async () => {
     if (!pageData) return false;
+
+    // Shikhar Sanket has only 1 page total
+    if (pageData.newspaper === 'Shikhar Sanket') {
+      return true;
+    }
 
     const currentPageNumber = parseInt(pageData.pageNumber);
     let relatedPages = [];
@@ -425,6 +476,116 @@ const Review = () => {
     }
   };
 
+  // CHECK AND MERGE ALL 8 PAGES
+  const checkAndMergeAll8Pages = async () => {
+    if (!pageData) return false;
+
+    try {
+      setIsMerging(true);
+      // 1. Fetch all 8 pages for this newspaper/edition/date
+      const conditions = [
+        where('edition', '==', pageData.edition),
+        where('date', '==', pageData.date)
+      ];
+      if (pageData.newspaper) {
+        conditions.push(where('newspaper', '==', pageData.newspaper));
+      }
+
+      const pagesQuery = query(collection(db, 'pages'), ...conditions);
+      const snap = await getDocs(pagesQuery);
+      
+      const expectedPages = pageData.newspaper === 'Shikhar Sanket' ? 1 : 8;
+      if (snap.size !== expectedPages) return false; // not all pages uploaded yet
+
+      let allApproved = true;
+      const pages = [];
+      snap.forEach(document => {
+        const data = document.data();
+        if (data.status !== 'accepted') allApproved = false;
+        pages.push({ id: document.id, ...data });
+      });
+
+      if (!allApproved) return false;
+
+      const storage = getStorage();
+      const newspaperName = pageData.newspaper || 'Nirnayak';
+      const finalFilename = `final_newspapers/${newspaperName}_${pageData.date}_${pageData.edition}.pdf`;
+
+      let pdfBlob;
+      if (expectedPages === 1) {
+        console.log("Single page newspaper approved! Fetching direct PDF...");
+        const res = await fetch(pages[0].url);
+        pdfBlob = await res.blob();
+      } else {
+        // All 8 are approved! Let's merge!
+        console.log("All 8 pages approved! Starting merge process...");
+        pages.sort((a, b) => parseInt(a.pageNumber) - parseInt(b.pageNumber));
+        
+        try {
+          // Try to merge using backend first (avoids CORS issues on the frontend)
+          const urls = pages.map(p => p.url);
+          const res = await fetch('http://localhost:3000/merge-urls', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls })
+          });
+          
+          if (!res.ok) throw new Error('Backend merge failed');
+          pdfBlob = await res.blob();
+        } catch (backendError) {
+          console.log("Backend merge failed or unavailable, falling back to browser merge", backendError);
+          // Fallback to browser merge using pdf-lib
+          const mergedPdf = await PDFDocument.create();
+          for (const p of pages) {
+              const res = await fetch(p.url);
+              const arrayBuffer = await res.arrayBuffer();
+              const pdfDoc = await PDFDocument.load(arrayBuffer);
+              const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+              copiedPages.forEach((page) => mergedPdf.addPage(page));
+          }
+          const pdfBytes = await mergedPdf.save();
+          pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+        }
+      }
+
+      // Upload to Firebase Storage
+      console.log("Uploading final PDF to Firebase...");
+      const finalRef = storageRef(storage, finalFilename);
+      await uploadBytes(finalRef, pdfBlob);
+      const finalUrl = await getDownloadURL(finalRef);
+
+      // Save to final_newspapers collection
+      console.log("Saving to Firestore final_newspapers collection...");
+      await addDoc(collection(db, 'final_newspapers'), {
+          newspaper: newspaperName,
+          edition: pageData.edition,
+          date: pageData.date,
+          url: finalUrl,
+          timestamp: new Date().toISOString()
+      });
+
+      // Delete temporary 8 pages from Storage and Firestore
+      console.log("Deleting temporary 8 pages...");
+      for (const p of pages) {
+          if (p.storagePath) {
+              const sRef = storageRef(storage, p.storagePath);
+              try { await deleteObject(sRef); } catch (e) { console.error("Error deleting storage object", e); }
+          }
+          await deleteDoc(doc(db, 'pages', p.id));
+      }
+
+      console.log("Merge and cleanup complete!");
+      return true;
+
+    } catch (error) {
+      console.error("Error during final merge:", error);
+      alert("Error merging final newspaper: " + error.message);
+      return false;
+    } finally {
+      setIsMerging(false);
+    }
+  };
+
 {/* Add this function to the Review.js component */}
 const handleViewApprovedPages = () => {
   // Navigate to ApprovedPages view with necessary data
@@ -442,6 +603,11 @@ const handleViewApprovedPages = () => {
 
 const renderRelatedPagesStatus = () => {
   if (!relatedPagesStatus) return null;
+
+  // Shikhar Sanket has only 1 page total, no groups or other pages to show
+  if (pageData && pageData.newspaper === 'Shikhar Sanket') {
+    return null;
+  }
 
   const currentPageNumber = parseInt(pageData?.pageNumber);
   let groupLabel;
@@ -502,19 +668,35 @@ const renderRelatedPagesStatus = () => {
         </div>
       ) : null}
 
-      <div className="group-actions">
+      <div className="group-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <button
           className="approve-all-button"
-          onClick={handleApproveAll}
-          disabled={isApprovingAll || entireGroupApproved}
+          onClick={() => handleApproveAll(true)}
+          disabled={isApprovingAll || entireGroupApproved || isMerging}
         >
-          {isApprovingAll ? (
+          {isApprovingAll || isMerging ? (
             <>
               <div className="spinner-small"></div> Processing...
             </>
           ) : (
             <>
-              <CheckCircle size={16} /> Approve All
+              <CheckCircle size={16} /> Approve All With Mail
+            </>
+          )}
+        </button>
+
+        <button
+          className="approve-all-button approve-all-no-mail-button"
+          onClick={() => handleApproveAll(false)}
+          disabled={isApprovingAll || entireGroupApproved || isMerging}
+        >
+          {isApprovingAll || isMerging ? (
+            <>
+              <div className="spinner-small"></div> Processing...
+            </>
+          ) : (
+            <>
+              <CheckCircle size={16} /> Approve All Without Mail
             </>
           )}
         </button>
@@ -532,12 +714,12 @@ const renderRelatedPagesStatus = () => {
   );
 };
 
-  if (isLoading) {
+  if (isLoading || isMerging) {
     return (
       <div className="review-container">
         <div className="loading-wrapper">
           <div className="loading-spinner"></div>
-          <p>Loading page details...</p>
+          <p>{isMerging ? "Merging final newspaper and cleaning up..." : "Loading page details..."}</p>
         </div>
       </div>
     );
@@ -667,7 +849,9 @@ const renderRelatedPagesStatus = () => {
 
               <div className="detail-item">
                 <span className="detail-label">Page Number</span>
-                <span className="detail-value">{pageData.pageNumber}</span>
+                <span className="detail-value">
+                  {pageData.newspaper === 'Shikhar Sanket' ? 'pages 1 to 8' : pageData.pageNumber}
+                </span>
               </div>
 
               <div className="detail-item">
@@ -732,9 +916,9 @@ const renderRelatedPagesStatus = () => {
                 <button
                   className="approve-button"
                   onClick={handleApprove}
-                  disabled={isSending || isCurrentPageApproved}
+                  disabled={isSending || isCurrentPageApproved || isMerging}
                 >
-                  {isSending ? (
+                  {isSending || isMerging ? (
                     <>
                       <div className="spinner-small"></div> Processing...
                     </>

@@ -5,6 +5,7 @@ import { collection, doc, setDoc, getDoc, getDocs, query, where, updateDoc } fro
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Import Firebase Storage
 
 const UploadPage = () => {
+  const [selectedNewspaper, setSelectedNewspaper] = useState('Nirnayak');
   const [selectedEdition, setSelectedEdition] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedPage, setSelectedPage] = useState('');
@@ -23,7 +24,16 @@ const UploadPage = () => {
   // API URL for email service
   const API_URL = process.env.REACT_APP_API_URL || 'https://api-olbm2m4ljq-uc.a.run.app';
 
-  const editions = ['Ujjain', 'Indore'];
+  const newspapers = ['Nirnayak', 'Shikhar Sanket'];
+  
+  const getEditionsForNewspaper = (newspaper) => {
+    if (newspaper === 'Shikhar Sanket') {
+      return ['Ujjain', 'Agar'];
+    }
+    return ['Ujjain', 'Indore']; // Default/Nirnayak
+  };
+  
+  const currentEditions = getEditionsForNewspaper(selectedNewspaper);
   const pageNumbers = Array.from({ length: 8 }, (_, i) => i + 1);
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -92,23 +102,34 @@ const UploadPage = () => {
 
         for (const date of datesToFetch) {
           newUploadedFiles[date] = {};
+          
+          for (const newspaper of newspapers) {
+            newUploadedFiles[date][newspaper] = {};
+            
+            const editionsForThisNP = getEditionsForNewspaper(newspaper);
+            
+            for (const edition of editionsForThisNP) {
+              newUploadedFiles[date][newspaper][edition] = Array(8).fill(null);
 
-          for (const edition of editions) {
-            newUploadedFiles[date][edition] = Array(8).fill(null);
+              for (let i = 0; i < 8; i++) {
+                const pageNum = i + 1;
+                // Backward compatibility: 'Nirnayak' uses old doc ID format
+                const docId = newspaper === 'Nirnayak' 
+                  ? `${date}_${edition}_Page${pageNum}` 
+                  : `${newspaper}_${date}_${edition}_Page${pageNum}`;
+                
+                const docRef = doc(db, 'pages', docId);
+                const docSnap = await getDoc(docRef);
 
-            for (let i = 0; i < 8; i++) {
-              const pageNum = i + 1;
-              const docRef = doc(db, 'pages', `${date}_${edition}_Page${pageNum}`);
-              const docSnap = await getDoc(docRef);
-
-              if (docSnap.exists()) {
-                const data = docSnap.data();
-                newUploadedFiles[date][edition][i] = {
-                  name: data.name,
-                  url: data.url,
-                  status: data.status,
-                  uploaded: data.timestamp
-                };
+                if (docSnap.exists()) {
+                  const data = docSnap.data();
+                  newUploadedFiles[date][newspaper][edition][i] = {
+                    name: data.name,
+                    url: data.url,
+                    status: data.status,
+                    uploaded: data.timestamp
+                  };
+                }
               }
             }
           }
@@ -120,22 +141,32 @@ const UploadPage = () => {
             const date = getDateForWeekday(weekStartDate, dayIndex);
             newUploadedFiles[date] = {};
 
-            for (const edition of editions) {
-              newUploadedFiles[date][edition] = Array(8).fill(null);
+            for (const newspaper of newspapers) {
+              newUploadedFiles[date][newspaper] = {};
+              
+              const editionsForThisNP = getEditionsForNewspaper(newspaper);
+              
+              for (const edition of editionsForThisNP) {
+                newUploadedFiles[date][newspaper][edition] = Array(8).fill(null);
 
-              for (let i = 0; i < 8; i++) {
-                const pageNum = i + 1;
-                const docRef = doc(db, 'pages', `${date}_${edition}_Page${pageNum}`);
-                const docSnap = await getDoc(docRef);
+                for (let i = 0; i < 8; i++) {
+                  const pageNum = i + 1;
+                  const docId = newspaper === 'Nirnayak' 
+                    ? `${date}_${edition}_Page${pageNum}` 
+                    : `${newspaper}_${date}_${edition}_Page${pageNum}`;
+                    
+                  const docRef = doc(db, 'pages', docId);
+                  const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                  const data = docSnap.data();
-                  newUploadedFiles[date][edition][i] = {
-                    name: data.name,
-                    url: data.url,
-                    status: data.status,
-                    uploaded: data.timestamp
-                  };
+                  if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    newUploadedFiles[date][newspaper][edition][i] = {
+                      name: data.name,
+                      url: data.url,
+                      status: data.status,
+                      uploaded: data.timestamp
+                    };
+                  }
                 }
               }
             }
@@ -233,9 +264,24 @@ Approve here: nirnayaknews.in/admin
     setSelectedPage('');
   };
 
+  const handleNewspaperChange = (e) => {
+    const val = e.target.value;
+    setSelectedNewspaper(val);
+    setSelectedEdition('');
+    if (val === 'Shikhar Sanket') {
+      setSelectedPage('1');
+    } else {
+      setSelectedPage('');
+    }
+  };
+
   const handleEditionChange = (e) => {
     setSelectedEdition(e.target.value);
-    setSelectedPage('');
+    if (selectedNewspaper === 'Shikhar Sanket') {
+      setSelectedPage('1');
+    } else {
+      setSelectedPage('');
+    }
   };
 
   const handlePageChange = (e) => {
@@ -261,18 +307,22 @@ Approve here: nirnayaknews.in/admin
     // Update the uploaded files state temporarily
     const pageIndex = parseInt(selectedPage, 10) - 1;
     const newUploadedFiles = { ...uploadedFiles };
+    const totalPages = selectedNewspaper === 'Shikhar Sanket' ? 1 : 8;
 
     // Initialize nested objects if they don't exist
     if (!newUploadedFiles[selectedDate]) {
       newUploadedFiles[selectedDate] = {};
     }
-    if (!newUploadedFiles[selectedDate][selectedEdition]) {
-      newUploadedFiles[selectedDate][selectedEdition] = Array(8).fill(null);
+    if (!newUploadedFiles[selectedDate][selectedNewspaper]) {
+      newUploadedFiles[selectedDate][selectedNewspaper] = {};
+    }
+    if (!newUploadedFiles[selectedDate][selectedNewspaper][selectedEdition]) {
+      newUploadedFiles[selectedDate][selectedNewspaper][selectedEdition] = Array(totalPages).fill(null);
     }
 
-    newUploadedFiles[selectedDate][selectedEdition][pageIndex] = {
+    newUploadedFiles[selectedDate][selectedNewspaper][selectedEdition][pageIndex] = {
       file,
-      name: `${selectedDate}_${selectedEdition}_Page${selectedPage}.${file.name.split('.').pop()}`,
+      name: `${selectedNewspaper}_${selectedDate}_${selectedEdition}_Page${selectedPage}.${file.name.split('.').pop()}`,
       status: 'selected',
       uploaded: new Date().toLocaleString()
     };
@@ -282,12 +332,13 @@ Approve here: nirnayaknews.in/admin
 
     // IMMEDIATELY SHOW PREVIEW after file selection
     const previewInfo = {
+      newspaper: selectedNewspaper,
       date: selectedDate,
       edition: selectedEdition,
       pageNum: parseInt(selectedPage, 10),
       fileInfo: {
         file,
-        name: `${selectedDate}_${selectedEdition}_Page${selectedPage}.${file.name.split('.').pop()}`,
+        name: `${selectedNewspaper}_${selectedDate}_${selectedEdition}_Page${selectedPage}.${file.name.split('.').pop()}`,
         status: 'selected',
         uploaded: new Date().toLocaleString()
       },
@@ -347,24 +398,25 @@ Approve here: nirnayaknews.in/admin
   };
 
   // Handle review click - now opens preview modal
-  const handleReviewClick = (date, edition, pageNum) => {
+  const handleReviewClick = (newspaper, date, edition, pageNum) => {
     const pageIndex = pageNum - 1;
 
     // Safely access nested object
-    const fileInfo = uploadedFiles[date]?.[edition]?.[pageIndex];
+    const fileInfo = uploadedFiles[date]?.[newspaper]?.[edition]?.[pageIndex];
 
-    if (!fileInfo || !fileInfo.file) {
+    if (!fileInfo) {
       setMessage('No file selected for this page.');
       return;
     }
 
     // Create preview data
     const previewInfo = {
+      newspaper,
       date,
       edition,
       pageNum,
       fileInfo,
-      previewUrl: URL.createObjectURL(fileInfo.file)
+      previewUrl: fileInfo.url || (fileInfo.file ? URL.createObjectURL(fileInfo.file) : null)
     };
 
     setPreviewData(previewInfo);
@@ -375,14 +427,14 @@ Approve here: nirnayaknews.in/admin
   const confirmUpload = async () => {
     if (!previewData) return;
 
-    const { date, edition, pageNum, fileInfo } = previewData;
+    const { newspaper, date, edition, pageNum, fileInfo } = previewData;
     const pageIndex = pageNum - 1;
 
     setShowPreview(false);
     setMessage('Uploading to Firebase Storage...');
 
     // Create a unique filename
-    const fileName = `${date}_${edition}_Page${pageNum}_${Date.now()}.${fileInfo.file.name.split('.').pop()}`;
+    const fileName = `${newspaper}_${date}_${edition}_Page${pageNum}_${Date.now()}.${fileInfo.file.name.split('.').pop()}`;
 
     try {
       // Upload to Firebase Storage
@@ -393,6 +445,7 @@ Approve here: nirnayaknews.in/admin
 
       // Page data to be saved in Firestore and sent in notification
       const pageData = {
+        newspaper: newspaper,
         name: fileInfo.name,
         url: url,
         status: 'review',
@@ -404,15 +457,21 @@ Approve here: nirnayaknews.in/admin
       };
 
       // Save to Firebase Firestore
-      const docRef = doc(db, 'pages', `${date}_${edition}_Page${pageNum}`);
+      const docId = newspaper === 'Nirnayak' 
+        ? `${date}_${edition}_Page${pageNum}` 
+        : `${newspaper}_${date}_${edition}_Page${pageNum}`;
+        
+      const docRef = doc(db, 'pages', docId);
       await setDoc(docRef, pageData);
 
       // Update the local state
       const newUploadedFiles = { ...uploadedFiles };
       if (!newUploadedFiles[date]) newUploadedFiles[date] = {};
-      if (!newUploadedFiles[date][edition]) newUploadedFiles[date][edition] = Array(8).fill(null);
+      if (!newUploadedFiles[date][newspaper]) newUploadedFiles[date][newspaper] = {};
+      const totalPages = newspaper === 'Shikhar Sanket' ? 1 : 8;
+      if (!newUploadedFiles[date][newspaper][edition]) newUploadedFiles[date][newspaper][edition] = Array(totalPages).fill(null);
 
-      newUploadedFiles[date][edition][pageIndex] = {
+      newUploadedFiles[date][newspaper][edition][pageIndex] = {
         ...fileInfo,
         url: url,
         status: 'review',
@@ -468,12 +527,12 @@ Approve here: nirnayaknews.in/admin
   };
 
   // Check if a page is available for upload
-  const isPageAvailableForUpload = (date, edition, pageNum) => {
-    if (!date || !edition) return false;
+  const isPageAvailableForUpload = (newspaper, date, edition, pageNum) => {
+    if (!newspaper || !date || !edition) return false;
 
     const pageIndex = pageNum - 1;
     // Safely access nested objects
-    const fileInfo = uploadedFiles[date]?.[edition]?.[pageIndex];
+    const fileInfo = uploadedFiles[date]?.[newspaper]?.[edition]?.[pageIndex];
 
     // Page is available if:
     // 1. No file has been uploaded yet
@@ -522,19 +581,50 @@ Approve here: nirnayaknews.in/admin
     }
   };
 
-  const renderPageItem = (date, edition, pageNum, fileInfo, isCommon) => {
+  const renderPageItem = (newspaper, date, edition, pageNum, fileInfo, isCommon) => {
+    const isShikharSanket = newspaper === 'Shikhar Sanket';
+    const label = isShikharSanket ? 'Full Newspaper' : `Page ${pageNum}`;
+    const previewUrl = fileInfo ? (fileInfo.url || (fileInfo.file ? URL.createObjectURL(fileInfo.file) : null)) : null;
+    const isPDF = previewUrl && (previewUrl.toLowerCase().split('?')[0].endsWith('.pdf') || (fileInfo.file && fileInfo.file.type === 'application/pdf'));
+
     return (
       <div
         key={pageNum}
         className={`page-item ${isCommon ? 'common-page' : 'unique-page'} ${fileInfo ? 'uploaded' : 'pending'}`}
+        style={{ cursor: fileInfo ? 'pointer' : 'default', padding: '15px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+        onClick={() => {
+          if (fileInfo) {
+            handleReviewClick(newspaper, date, edition, pageNum);
+          }
+        }}
       >
         <div className="page-number">
-          Page {pageNum} {fileInfo && fileInfo.status && getStatusIcon(fileInfo.status)}
+          {label} {fileInfo && fileInfo.status && getStatusIcon(fileInfo.status)}
         </div>
+        
+        {/* Direct thumbnail image/PDF preview */}
+        {fileInfo && previewUrl && (
+          <div className="page-thumbnail-container" style={{ width: '100%', height: '120px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #cbd5e1', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f1f5f9' }}>
+            {isPDF ? (
+              <iframe
+                src={previewUrl}
+                title={label}
+                style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }}
+              />
+            ) : (
+              <img
+                src={previewUrl}
+                alt={label}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            )}
+          </div>
+        )}
+
         <div className="page-status">
           {fileInfo ? (
             <>
-              <div>{fileInfo.name}</div>
+              <div style={{ wordBreak: 'break-word', fontSize: '11px', fontWeight: '500' }}>{fileInfo.name}</div>
               <div className="upload-time">{fileInfo.uploaded}</div>
               {fileInfo.status === 'rejected' && (
                 <div className="rejected-message">Rejected. Please upload again.</div>
@@ -544,16 +634,20 @@ Approve here: nirnayaknews.in/admin
             'Not uploaded'
           )}
         </div>
-        <button
-          className="common-tag"
-          onClick={() => handleReviewClick(date, edition, pageNum)}
-          disabled={isUploading || isNotifying || !fileInfo || fileInfo.status === 'accepted' || fileInfo.status === 'review' || !fileInfo.file}
-        >
-          {(isUploading || isNotifying) && date === selectedDate && edition === selectedEdition && pageNum === parseInt(selectedPage) ?
-            (isUploading ? 'Uploading...' : 'Notifying...') :
-            fileInfo && fileInfo.status === 'accepted' ? 'Accepted' :
-              fileInfo && fileInfo.status === 'review' ? 'In Review' : 'Review'}
-        </button>
+        
+        {fileInfo && (
+          <button
+            className="common-tag"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleReviewClick(newspaper, date, edition, pageNum);
+            }}
+            disabled={isUploading || isNotifying || fileInfo.status === 'accepted' || fileInfo.status === 'review'}
+          >
+            {fileInfo.status === 'accepted' ? 'Accepted' :
+              fileInfo.status === 'review' ? 'In Review' : 'Preview'}
+          </button>
+        )}
       </div>
     );
   };
@@ -573,20 +667,27 @@ Approve here: nirnayaknews.in/admin
     return (
       <div className="upload-summary">
         <h3>Upload Summary for {formatDisplayDate(selectedDate)}</h3>
-        <div className="date-container">
-          {editions.map(edition => (
-            <div key={`${selectedDate}_${edition}`} className="edition-summary">
-              <h4>{edition} Edition</h4>
-              <div className="page-grid">
-                {uploadedFiles[selectedDate][edition]?.map((fileInfo, index) => {
-                  const pageNum = index + 1;
-                  const isCommon = pageIsCommon(pageNum);
-                  return renderPageItem(selectedDate, edition, pageNum, fileInfo, isCommon);
-                })}
-              </div>
+        {newspapers.map(newspaper => {
+          const editionsForNP = getEditionsForNewspaper(newspaper);
+          return (
+          <div key={newspaper} className="newspaper-summary" style={{ marginBottom: '30px', padding: '15px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
+            <h3 style={{ marginTop: '0', borderBottom: '2px solid #cbd5e1', paddingBottom: '8px', color: '#1e293b' }}>📰 {newspaper}</h3>
+            <div className="date-container" style={{ marginTop: '15px' }}>
+              {editionsForNP.map(edition => (
+                <div key={`${selectedDate}_${newspaper}_${edition}`} className="edition-summary">
+                  <h4>{edition} Edition</h4>
+                  <div className="page-grid">
+                    {uploadedFiles[selectedDate]?.[newspaper]?.[edition]?.map((fileInfo, index) => {
+                      const pageNum = index + 1;
+                      const isCommon = pageIsCommon(pageNum);
+                      return renderPageItem(newspaper, selectedDate, edition, pageNum, fileInfo, isCommon);
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )})}
       </div>
     );
   };
@@ -596,23 +697,24 @@ Approve here: nirnayaknews.in/admin
     if (!showPreview || !previewData) return null;
 
     const { date, edition, pageNum, fileInfo, previewUrl } = previewData;
-    const fileType = fileInfo.file.type;
-    const isPDF = fileType === 'application/pdf';
-    const isImage = fileType.startsWith('image/');
+    const fileType = fileInfo.file ? fileInfo.file.type : '';
+    const isPDF = previewUrl && (previewUrl.toLowerCase().split('?')[0].endsWith('.pdf') || fileType === 'application/pdf');
+    const isImage = (previewUrl && !isPDF) || (fileType && fileType.startsWith('image/'));
 
     return (
       <div className="preview-modal-overlay">
         <div className="preview-modal">
           <div className="preview-header">
-            <h3>Review Page Before Upload</h3>
+            <h3>Review Page Preview</h3>
             <button className="close-button" onClick={cancelPreview}>×</button>
           </div>
 
           <div className="preview-info">
+            <p><strong>Newspaper:</strong> {previewData.newspaper}</p>
             <p><strong>Date:</strong> {formatDisplayDate(date)}</p>
             <p><strong>Edition:</strong> {edition}</p>
-            <p><strong>Page Number:</strong> {pageNum}</p>
-            <p><strong>File:</strong> {fileInfo.file.name}</p>
+            <p><strong>Page Number:</strong> {previewData.newspaper === 'Shikhar Sanket' ? 'Full Newspaper' : pageNum}</p>
+            <p><strong>File:</strong> {fileInfo.name || (fileInfo.file ? fileInfo.file.name : '')}</p>
           </div>
 
           <div className="preview-content">
@@ -625,7 +727,7 @@ Approve here: nirnayaknews.in/admin
                   height="500px"
                 />
                 <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                  📄 Preview your PDF above. Make sure this is the correct page before uploading.
+                  📄 PDF Document Preview.
                 </p>
               </div>
             ) : isImage ? (
@@ -636,13 +738,13 @@ Approve here: nirnayaknews.in/admin
                   style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
                 />
                 <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                  🖼️ Preview your image above. Make sure this is the correct page before uploading.
+                  🖼️ Image Preview.
                 </p>
               </div>
             ) : (
               <div className="unsupported-preview">
                 <p>Preview not available for this file type.</p>
-                <p>File: {fileInfo.file.name}</p>
+                <p>File: {fileInfo.name}</p>
               </div>
             )}
           </div>
@@ -653,15 +755,17 @@ Approve here: nirnayaknews.in/admin
               onClick={cancelPreview}
               disabled={isUploading || isNotifying}
             >
-              ❌ Cancel (Wrong File)
+              ❌ Close
             </button>
-            <button
-              className="confirm-button"
-              onClick={confirmUpload}
-              disabled={isUploading || isNotifying}
-            >
-              {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : '✅ Confirm & Send for Review'}
-            </button>
+            {fileInfo.file && fileInfo.status === 'selected' && (
+              <button
+                className="confirm-button"
+                onClick={confirmUpload}
+                disabled={isUploading || isNotifying}
+              >
+                {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : '✅ Confirm & Send for Review'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -684,48 +788,63 @@ Approve here: nirnayaknews.in/admin
         {getDateOptions()}
 
         <div className="form-group">
-          <label>Select Edition:</label>
+          <label>Select Newspaper:</label>
           <select
-            value={selectedEdition}
-            onChange={handleEditionChange}
-            disabled={!selectedDate}
+            value={selectedNewspaper}
+            onChange={handleNewspaperChange}
           >
-            <option value="">-- Select Edition --</option>
-            {editions.map(edition => (
-              <option key={edition} value={edition}>{edition} Edition</option>
+            <option value="">-- Select Newspaper --</option>
+            {newspapers.map(np => (
+              <option key={np} value={np}>{np}</option>
             ))}
           </select>
         </div>
 
         <div className="form-group">
-          <label>Select Page Number:</label>
+          <label>Select Edition:</label>
           <select
-            value={selectedPage}
-            onChange={handlePageChange}
-            disabled={!selectedEdition || !selectedDate}
+            value={selectedEdition}
+            onChange={handleEditionChange}
+            disabled={!selectedDate || !selectedNewspaper}
           >
-            <option value="">-- Select Page --</option>
-            {pageNumbers.map(num => {
-              const isAvailable = isPageAvailableForUpload(selectedDate, selectedEdition, num);
-              const status = selectedDate && selectedEdition ?
-                (uploadedFiles[selectedDate]?.[selectedEdition]?.[num - 1]?.status || 'available') :
-                'available';
-
-              return (
-                <option
-                  key={num}
-                  value={num}
-                  disabled={!isAvailable}
-                  style={{ color: isAvailable ? 'black' : '#aaa' }}
-                >
-                  Page {num} {num !== 1 && num !== 8 ? '(Common)' : '(Unique)'}
-                  {status === 'review' ? ' - In Review' :
-                    status === 'accepted' ? ' - Accepted' : ''}
-                </option>
-              );
-            })}
+            <option value="">-- Select Edition --</option>
+            {currentEditions.map(edition => (
+              <option key={edition} value={edition}>{edition} Edition</option>
+            ))}
           </select>
         </div>
+
+        {selectedNewspaper !== 'Shikhar Sanket' && (
+          <div className="form-group">
+            <label>Select Page Number:</label>
+            <select
+              value={selectedPage}
+              onChange={handlePageChange}
+              disabled={!selectedEdition || !selectedDate || !selectedNewspaper}
+            >
+              <option value="">-- Select Page --</option>
+              {pageNumbers.map(num => {
+                const isAvailable = isPageAvailableForUpload(selectedNewspaper, selectedDate, selectedEdition, num);
+                const status = selectedDate && selectedEdition && selectedNewspaper ?
+                  (uploadedFiles[selectedDate]?.[selectedNewspaper]?.[selectedEdition]?.[num - 1]?.status || 'available') :
+                  'available';
+  
+                return (
+                  <option
+                    key={num}
+                    value={num}
+                    disabled={!isAvailable}
+                    style={{ color: isAvailable ? 'black' : '#aaa' }}
+                  >
+                    Page {num} {num !== 1 && num !== 8 ? '(Common)' : '(Unique)'}
+                    {status === 'review' ? ' - In Review' :
+                      status === 'accepted' ? ' - Accepted' : ''}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        )}
 
         <div className="form-group">
           <label>Upload File (PDF, JPG, PNG):</label>
@@ -733,7 +852,7 @@ Approve here: nirnayaknews.in/admin
             type="file"
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileChange}
-            disabled={!selectedEdition || !selectedPage || !selectedDate || isUploading || isNotifying || !isPageAvailableForUpload(selectedDate, selectedEdition, selectedPage)}
+            disabled={!selectedNewspaper || !selectedEdition || !selectedPage || !selectedDate || isUploading || isNotifying || !isPageAvailableForUpload(selectedNewspaper, selectedDate, selectedEdition, selectedPage)}
           />
           <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
             💡 A preview will appear immediately after selecting a file

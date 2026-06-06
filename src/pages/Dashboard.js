@@ -20,7 +20,15 @@ const Dashboard = () => {
   const [generatedPdfs, setGeneratedPdfs] = useState({});
   const navigate = useNavigate();
 
-  const editions = ['Ujjain', 'Indore'];
+  const newspapers = ['Nirnayak', 'Shikhar Sanket'];
+  
+  const getEditionsForNewspaper = (newspaper) => {
+    if (newspaper === 'Shikhar Sanket') {
+      return ['Ujjain', 'Agar'];
+    }
+    return ['Ujjain', 'Indore']; // Default/Nirnayak
+  };
+
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   // Date utility functions - same as in UploadPage
@@ -92,18 +100,19 @@ const Dashboard = () => {
 
     // For each date with data
     for (const date in pagesData) {
-      // For each edition
-      for (const edition of editions) {
-        const editionPages = pagesData[date][edition];
+      for (const newspaper in pagesData[date]) {
+        for (const edition of getEditionsForNewspaper(newspaper)) {
+          const editionPages = pagesData[date][newspaper][edition];
+          const expectedPages = newspaper === 'Shikhar Sanket' ? 1 : 8;
 
-        if (!editionPages || editionPages.length !== 8) continue;
+          if (!editionPages || editionPages.length !== expectedPages) continue;
 
-        // Check if all 8 pages exist and are accepted
-        const allPagesAccepted = editionPages.length === 8 &&
-          editionPages.every(page => page && page.status === 'accepted');
+          // Check if all pages exist and are accepted
+          const allPagesAccepted = editionPages.length === expectedPages &&
+            editionPages.every(page => page && page.status === 'accepted');
 
         // Create unique key for this edition and date
-        const pdfKey = `${date}_${edition}`;
+        const pdfKey = `${newspaper}_${date}_${edition}`;
 
         // If all pages are accepted and we haven't already generated a PDF, generate one
         if (allPagesAccepted && !newGeneratedPdfs[pdfKey]) {
@@ -114,7 +123,8 @@ const Dashboard = () => {
               generated: false,
               url: null,
               date,
-              edition
+              edition,
+              newspaper
             };
           } catch (error) {
             console.error(`Error pre-checking PDF generation status for ${edition} on ${date}:`, error);
@@ -122,20 +132,22 @@ const Dashboard = () => {
         }
       }
     }
+  }
 
-    setGeneratedPdfs(newGeneratedPdfs);
+  setGeneratedPdfs(newGeneratedPdfs);
   };
 
 // Dashboard.js - Updated generateAndDownloadPdf function
 
-const generateAndDownloadPdf = async (date, edition) => {
-  const pdfKey = `${date}_${edition}`;
-  const editionPages = pagesData[date]?.[edition];
+const generateAndDownloadPdf = async (newspaper, date, edition) => {
+  const pdfKey = `${newspaper}_${date}_${edition}`;
+  const editionPages = pagesData[date]?.[newspaper]?.[edition];
+  const expectedPages = newspaper === 'Shikhar Sanket' ? 1 : 8;
 
   console.log("🛠️ Attempting to generate PDF...");
   console.log("📅 Date:", date, "📰 Edition:", edition);
   
-  if (!editionPages || editionPages.length !== 8) {
+  if (!editionPages || editionPages.length !== expectedPages) {
       console.error("❌ Cannot generate PDF: missing pages.");
       alert("Cannot generate PDF: missing pages.");
       return;
@@ -233,6 +245,7 @@ const generateAndDownloadPdf = async (date, edition) => {
       // The date parameter already contains the selected date, so we're using it correctly here
       try {
           await addDoc(collection(db, 'newspaper_data'), {
+              newspaper: newspaper,
               date: date, // This is already the selected date passed from the calling function
               edition: edition,
               issueNumber: customIssueNumber,
@@ -286,60 +299,79 @@ const generateAndDownloadPdf = async (date, edition) => {
         }
       }
 
-      // Initialize stats for all editions
-      editions.forEach(edition => {
-        stats[edition] = {
-          totalPages: 8 * datesToFetch.length,
-          uploadedPages: 0,
-          acceptedPages: 0,
-          rejectedPages: 0,
-          reviewPages: 0
-        };
+      // Initialize stats for all newspapers and editions
+      newspapers.forEach(newspaper => {
+        const expectedPages = newspaper === 'Shikhar Sanket' ? 1 : 8;
+        getEditionsForNewspaper(newspaper).forEach(edition => {
+          const statKey = `${newspaper}_${edition}`;
+          stats[statKey] = {
+            totalPages: expectedPages * (dateType === 'daily' ? 1 : datesToFetch.length),
+            uploadedPages: 0,
+            acceptedPages: 0,
+            rejectedPages: 0,
+            reviewPages: 0
+          };
+        });
       });
 
       // Fetch pages for each date
       for (const date of datesToFetch) {
         newPagesData[date] = {};
 
-        for (const edition of editions) {
-          newPagesData[date][edition] = [];
+        for (const newspaper of newspapers) {
+          newPagesData[date][newspaper] = {};
+          
+          for (const edition of getEditionsForNewspaper(newspaper)) {
+            newPagesData[date][newspaper][edition] = [];
 
-          // Fetch pages for this date and edition
-          const q = query(
-            collection(db, 'pages'),
-            where('date', '==', date),
-            where('edition', '==', edition)
-          );
+            // Fetch pages for this date, newspaper, and edition
+            // Backward compatibility logic
+            const docIdPrefix = newspaper === 'Nirnayak' ? '' : `${newspaper}_`;
+            
+            const expectedPages = newspaper === 'Shikhar Sanket' ? 1 : 8;
+            const q = query(
+              collection(db, 'pages'),
+              where('date', '==', date),
+              where('edition', '==', edition)
+            );
 
-          const querySnapshot = await getDocs(q);
+            const querySnapshot = await getDocs(q);
 
-          // Initialize with 8 empty pages
-          for (let i = 0; i < 8; i++) {
-            newPagesData[date][edition][i] = null;
-          }
-
-          // Fill in the fetched pages
-          querySnapshot.forEach(doc => {
-            const data = doc.data();
-            const pageIndex = data.pageNumber - 1;
-
-            // Store the page data with its document ID
-            newPagesData[date][edition][pageIndex] = {
-              id: doc.id,
-              ...data
-            };
-
-            // Update stats
-            stats[edition].uploadedPages++;
-
-            if (data.status === 'accepted') {
-              stats[edition].acceptedPages++;
-            } else if (data.status === 'rejected') {
-              stats[edition].rejectedPages++;
-            } else if (data.status === 'review') {
-              stats[edition].reviewPages++;
+            // Initialize with expected pages
+            for (let i = 0; i < expectedPages; i++) {
+              newPagesData[date][newspaper][edition][i] = null;
             }
-          });
+
+            // Fill in the fetched pages
+            querySnapshot.forEach(doc => {
+              const data = doc.data();
+              // Check newspaper match (handle backward compatibility where Nirnayak might not have newspaper field)
+              const dataNewspaper = data.newspaper || 'Nirnayak';
+              if (dataNewspaper !== newspaper) return;
+
+              const pageIndex = data.pageNumber - 1;
+
+              // Store the page data with its document ID
+              newPagesData[date][newspaper][edition][pageIndex] = {
+                id: doc.id,
+                ...data
+              };
+
+              // Update stats
+              if (dateType === 'weekly' || date === selectedDate) {
+                const statKey = `${newspaper}_${edition}`;
+                stats[statKey].uploadedPages++;
+
+                if (data.status === 'accepted') {
+                  stats[statKey].acceptedPages++;
+                } else if (data.status === 'rejected') {
+                  stats[statKey].rejectedPages++;
+                } else if (data.status === 'review') {
+                  stats[statKey].reviewPages++;
+                }
+              }
+            });
+          }
         }
       }
 
@@ -450,12 +482,13 @@ const generateAndDownloadPdf = async (date, edition) => {
     }
   };
 
-  // Check if all pages are accepted for a specific date and edition
-  const areAllPagesAccepted = (date, edition) => {
-    if (!pagesData[date] || !pagesData[date][edition]) return false;
+  // Check if all pages are accepted for a specific date, newspaper and edition
+  const areAllPagesAccepted = (newspaper, date, edition) => {
+    if (!pagesData[date] || !pagesData[date][newspaper] || !pagesData[date][newspaper][edition]) return false;
 
-    const pages = pagesData[date][edition];
-    if (pages.length !== 8) return false;
+    const pages = pagesData[date][newspaper][edition];
+    const expectedPages = newspaper === 'Shikhar Sanket' ? 1 : 8;
+    if (pages.length !== expectedPages) return false;
 
     return pages.every(page => page && page.status === 'accepted');
   };
@@ -465,75 +498,83 @@ const generateAndDownloadPdf = async (date, edition) => {
       return (
         <div className="date-container">
           <h3>{formatDisplayDate(selectedDate)}</h3>
-          <div className="editions-container">
-            {editions.map(edition => {
-              const allAccepted = areAllPagesAccepted(selectedDate, edition);
-              const pdfKey = `${selectedDate}_${edition}`;
-              const isPdfReady = generatedPdfs[pdfKey]?.generated;
-              const isDownloading = downloadingEdition === pdfKey;
+          {newspapers.map(newspaper => (
+            <div key={newspaper} className="newspaper-section" style={{ marginBottom: '40px' }}>
+              <h3 style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '10px' }}>📰 {newspaper}</h3>
+              <div className="editions-container" style={{ marginTop: '20px' }}>
+                {getEditionsForNewspaper(newspaper).map(edition => {
+                  const allAccepted = areAllPagesAccepted(newspaper, selectedDate, edition);
+                  const pdfKey = `${newspaper}_${selectedDate}_${edition}`;
+                  const isPdfReady = generatedPdfs[pdfKey]?.generated;
+                  const isDownloading = downloadingEdition === pdfKey;
 
-              return (
-                <div key={edition} className="edition-pages">
-                  <div className="edition-header">
-                    <h4>{edition} Edition</h4>
-                    <div className="edition-actions">
-                      <button
-                        className={`download-all-button ${allAccepted ? 'active' : 'disabled'}`}
-                        disabled={!allAccepted || isDownloading}
-                        onClick={() => generateAndDownloadPdf(selectedDate, edition)}
-                      >
-                        {isDownloading ? 'Generating...' : (
-                          <>
-                            <Download size={16} /> Download All Pages
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="pages-grid">
-                    {pagesData[selectedDate][edition]?.map((page, index) => (
-                      <div
-                        key={`${selectedDate}_${edition}_${index}`}
-                        className={`page-card ${page ? getStatusClass(page.status) : 'page-missing'}`}
-                      >
-                        <div className="page-header">
-                          <span>Page {index + 1}</span>
-                          {page && (
-                            <span className="page-status">{page.status}</span>
-                          )}
+                  return (
+                    <div key={edition} className="edition-pages">
+                      <div className="edition-header">
+                        <h4>{edition} Edition</h4>
+                        <div className="edition-actions">
+                          <button
+                            className={`download-all-button ${allAccepted ? 'active' : 'disabled'}`}
+                            disabled={!allAccepted || isDownloading}
+                            onClick={() => generateAndDownloadPdf(newspaper, selectedDate, edition)}
+                          >
+                            {isDownloading ? 'Generating...' : (
+                              <>
+                                <Download size={16} /> Download All Pages
+                              </>
+                            )}
+                          </button>
                         </div>
-                        {page ? (
-                          <>
-                            <div className="page-thumbnail">
-                              {page.url && (
-                                <iframe
-                                  src={page.url}
-                                  alt={`${edition} Page ${index + 1}`}
-                                  className="thumbnail-image"
-                                />
+                      </div>
+                      <div className="pages-grid">
+                        {pagesData[selectedDate][newspaper]?.[edition]?.map((page, index) => {
+                          const label = newspaper === 'Shikhar Sanket' ? 'Full Newspaper' : `Page ${index + 1}`;
+                          return (
+                          <div
+                            key={`${selectedDate}_${newspaper}_${edition}_${index}`}
+                            className={`page-card ${page ? getStatusClass(page.status) : 'page-missing'}`}
+                          >
+                            <div className="page-header">
+                              <span>{label}</span>
+                              {page && (
+                                <span className="page-status">{page.status}</span>
                               )}
                             </div>
-                            <div className="page-actions">
-                              <button
-                                className="review-button"
-                                onClick={() => navigateToPageReview(page)}
-                              >
-                                Review
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="page-placeholder">
-                            Not uploaded
+                            {page ? (
+                              <>
+                                <div className="page-thumbnail">
+                                  {page.url && (
+                                    <iframe
+                                      src={page.url}
+                                      alt={`${edition} ${label}`}
+                                      className="thumbnail-image"
+                                    />
+                                  )}
+                                </div>
+                                <div className="page-actions">
+                                  <button
+                                    className="review-button"
+                                    onClick={() => navigateToPageReview(page)}
+                                  >
+                                    Review
+                                  </button>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="page-placeholder">
+                                Not uploaded
+                              </div>
+                            )}
                           </div>
-                        )}
+                        );
+                      })}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       );
     } else if (dateType === 'weekly') {
@@ -573,10 +614,10 @@ const generateAndDownloadPdf = async (date, edition) => {
   };
 
   // Calculate completion percentages for each edition
-  const calculateCompletion = (edition) => {
-    if (!editionStats[edition]) return { upload: 0, review: 0, approved: 0 };
+  const calculateCompletion = (statKey) => {
+    if (!editionStats[statKey]) return { upload: 0, review: 0, approved: 0 };
 
-    const stats = editionStats[edition];
+    const stats = editionStats[statKey];
     const totalPages = stats.totalPages || 1; // Prevent division by zero
 
     return {
@@ -591,56 +632,64 @@ const generateAndDownloadPdf = async (date, edition) => {
     return (
       <div className="stats-dashboard">
         <h3>Current Status</h3>
-        <div className="editions-stats">
-          {editions.map(edition => {
-            const completion = calculateCompletion(edition);
-            const stats = editionStats[edition] || {};
+        <div className="editions-stats" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {newspapers.map(newspaper => (
+            <div key={newspaper} className="newspaper-stats">
+              <h4 style={{ marginBottom: '10px' }}>{newspaper}</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                {getEditionsForNewspaper(newspaper).map(edition => {
+                  const statKey = `${newspaper}_${edition}`;
+                  const completion = calculateCompletion(statKey);
+                  const stats = editionStats[statKey] || {};
 
-            return (
-              <div key={edition} className="edition-stat-card">
-                <h4>{edition} Edition</h4>
-                <div className="stat-grid">
-                  <div className="stat-item">
-                    <span className="stat-label">Pages Uploaded</span>
-                    <span className="stat-value">{stats.uploadedPages || 0}/{stats.totalPages || 0}</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${completion.upload}%` }}
-                      ></div>
-                    </div>
-                    <span className="stat-percentage">{completion.upload}%</span>
-                  </div>
+                  return (
+                    <div key={edition} className="edition-stat-card" style={{ flex: '1', minWidth: '300px' }}>
+                      <h4>{edition} Edition</h4>
+                      <div className="stat-grid">
+                        <div className="stat-item">
+                          <span className="stat-label">Pages Uploaded</span>
+                          <span className="stat-value">{stats.uploadedPages || 0}/{stats.totalPages || 0}</span>
+                          <div className="progress-bar">
+                            <div
+                              className="progress-fill"
+                              style={{ width: `${completion.upload}%` }}
+                            ></div>
+                          </div>
+                          <span className="stat-percentage">{completion.upload}%</span>
+                        </div>
 
-                  <div className="stat-item">
-                    <span className="stat-label">Pages Reviewed</span>
-                    <span className="stat-value">
-                      {(stats.acceptedPages || 0) + (stats.rejectedPages || 0)}/{stats.uploadedPages || 0}
-                    </span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${completion.review}%` }}
-                      ></div>
-                    </div>
-                    <span className="stat-percentage">{completion.review}%</span>
-                  </div>
+                        <div className="stat-item">
+                          <span className="stat-label">Pages Reviewed</span>
+                          <span className="stat-value">
+                            {(stats.acceptedPages || 0) + (stats.rejectedPages || 0)}/{stats.uploadedPages || 0}
+                          </span>
+                          <div className="progress-bar">
+                            <div
+                              className="progress-fill"
+                              style={{ width: `${completion.review}%` }}
+                            ></div>
+                          </div>
+                          <span className="stat-percentage">{completion.review}%</span>
+                        </div>
 
-                  <div className="stat-item">
-                    <span className="stat-label">Pages Approved</span>
-                    <span className="stat-value">{stats.acceptedPages || 0}/{stats.uploadedPages || 0}</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${completion.approved}%` }}
-                      ></div>
+                        <div className="stat-item">
+                          <span className="stat-label">Pages Approved</span>
+                          <span className="stat-value">{stats.acceptedPages || 0}/{stats.uploadedPages || 0}</span>
+                          <div className="progress-bar">
+                            <div
+                              className="progress-fill"
+                              style={{ width: `${completion.approved}%` }}
+                            ></div>
+                          </div>
+                          <span className="stat-percentage">{completion.approved}%</span>
+                        </div>
+                      </div>
                     </div>
-                    <span className="stat-percentage">{completion.approved}%</span>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     );

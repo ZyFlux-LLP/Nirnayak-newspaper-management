@@ -892,6 +892,14 @@
   cursor: not-allowed;
 }
 
+.approve-all-no-mail-button {
+  background-color: #f59f00;
+}
+
+.approve-all-no-mail-button:hover {
+  background-color: #f08c00;
+}
+
 /* Status colors */
 .status-accepted {
   color: #2b8a3e;
