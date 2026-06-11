@@ -3,6 +3,88 @@ import '../css/UploadPage.css';
 import { db } from '../firebase'; // Import your existing Firebase setup
 import { collection, doc, setDoc, getDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Import Firebase Storage
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set worker Src to matching CDN version
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
+const CanvasPDFViewer = ({ url }) => {
+  const containerRef = React.useRef(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+
+    const renderPDF = async () => {
+      try {
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdf = await loadingTask.promise;
+        
+        if (!active) return;
+        
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+        }
+
+        // Render each page of the PDF to its own canvas
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          if (!active) break;
+          const page = await pdf.getPage(pageNum);
+          
+          // Render at 1.5x scale for good resolution
+          const viewport = page.getViewport({ scale: 1.5 });
+          
+          const canvas = document.createElement('canvas');
+          canvas.style.display = 'block';
+          canvas.style.marginBottom = '15px';
+          canvas.style.width = '100%';
+          canvas.style.maxWidth = '650px';
+          canvas.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+          canvas.style.borderRadius = '4px';
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          
+          const context = canvas.getContext('2d');
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport,
+          };
+          
+          if (containerRef.current) {
+            containerRef.current.appendChild(canvas);
+          }
+          
+          await page.render(renderContext).promise;
+        }
+        
+        if (active) setLoading(false);
+      } catch (err) {
+        console.error('PDF rendering error:', err);
+        if (active) {
+          setError(err.message || 'Failed to render PDF document.');
+          setLoading(false);
+        }
+      }
+    };
+
+    renderPDF();
+
+    return () => {
+      active = false;
+    };
+  }, [url]);
+
+  return (
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {loading && <div style={{ padding: '20px', color: '#666', fontSize: '14px' }}>Loading document preview pages...</div>}
+      {error && <div style={{ padding: '20px', color: '#dc2626', fontSize: '14px' }}>Error rendering PDF: {error}</div>}
+      <div ref={containerRef} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} />
+    </div>
+  );
+};
 
 const UploadPage = () => {
   const [selectedNewspaper, setSelectedNewspaper] = useState('Nirnayak');
@@ -606,11 +688,13 @@ Approve here: nirnayaknews.in/admin
         {fileInfo && previewUrl && (
           <div className="page-thumbnail-container" style={{ width: '100%', height: '120px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #cbd5e1', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f1f5f9' }}>
             {isPDF ? (
-              <iframe
-                src={previewUrl}
-                title={label}
-                style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }}
-              />
+              !showPreview && (
+                <iframe
+                  src={previewUrl}
+                  title={label}
+                  style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }}
+                />
+              )
             ) : (
               <img
                 src={previewUrl}
@@ -692,85 +776,6 @@ Approve here: nirnayaknews.in/admin
     );
   };
 
-  // Preview Modal Component
-  const PreviewModal = () => {
-    if (!showPreview || !previewData) return null;
-
-    const { date, edition, pageNum, fileInfo, previewUrl } = previewData;
-    const fileType = fileInfo.file ? fileInfo.file.type : '';
-    const isPDF = previewUrl && (previewUrl.toLowerCase().split('?')[0].endsWith('.pdf') || fileType === 'application/pdf');
-    const isImage = (previewUrl && !isPDF) || (fileType && fileType.startsWith('image/'));
-
-    return (
-      <div className="preview-modal-overlay">
-        <div className="preview-modal">
-          <div className="preview-header">
-            <h3>Review Page Preview</h3>
-            <button className="close-button" onClick={cancelPreview}>×</button>
-          </div>
-
-          <div className="preview-info">
-            <p><strong>Newspaper:</strong> {previewData.newspaper}</p>
-            <p><strong>Date:</strong> {formatDisplayDate(date)}</p>
-            <p><strong>Edition:</strong> {edition}</p>
-            <p><strong>Page Number:</strong> {previewData.newspaper === 'Shikhar Sanket' ? 'Full Newspaper' : pageNum}</p>
-            <p><strong>File:</strong> {fileInfo.name || (fileInfo.file ? fileInfo.file.name : '')}</p>
-          </div>
-
-          <div className="preview-content">
-            {isPDF ? (
-              <div className="pdf-preview">
-                <embed
-                  src={previewUrl}
-                  type="application/pdf"
-                  width="100%"
-                  height="500px"
-                />
-                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                  📄 PDF Document Preview.
-                </p>
-              </div>
-            ) : isImage ? (
-              <div className="image-preview">
-                <img
-                  src={previewUrl}
-                  alt={`Page ${pageNum} preview`}
-                  style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
-                />
-                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                  🖼️ Image Preview.
-                </p>
-              </div>
-            ) : (
-              <div className="unsupported-preview">
-                <p>Preview not available for this file type.</p>
-                <p>File: {fileInfo.name}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="preview-actions">
-            <button
-              className="cancel-button"
-              onClick={cancelPreview}
-              disabled={isUploading || isNotifying}
-            >
-              ❌ Close
-            </button>
-            {fileInfo.file && fileInfo.status === 'selected' && (
-              <button
-                className="confirm-button"
-                onClick={confirmUpload}
-                disabled={isUploading || isNotifying}
-              >
-                {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : '✅ Confirm & Send for Review'}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="upload-page-container">
@@ -872,7 +877,87 @@ Approve here: nirnayaknews.in/admin
       {renderUploadSummary()}
 
       {/* Preview Modal */}
-      <PreviewModal />
+      {showPreview && previewData && (() => {
+        const { date, edition, pageNum, fileInfo, previewUrl } = previewData;
+        const fileType = fileInfo.file ? fileInfo.file.type : '';
+        const isPDF = previewUrl && (previewUrl.toLowerCase().split('?')[0].endsWith('.pdf') || fileType === 'application/pdf');
+        const isImage = (previewUrl && !isPDF) || (fileType && fileType.startsWith('image/'));
+
+        return (
+          <div className="preview-modal-overlay">
+            <div className="preview-modal">
+              <div className="preview-header">
+                <h3>Review Page Preview</h3>
+                <button className="close-button" onClick={cancelPreview}>×</button>
+              </div>
+
+              <div className="preview-info">
+                <p><strong>Newspaper:</strong> {previewData.newspaper}</p>
+                <p><strong>Date:</strong> {formatDisplayDate(date)}</p>
+                <p><strong>Edition:</strong> {edition}</p>
+                <p><strong>Page Number:</strong> {previewData.newspaper === 'Shikhar Sanket' ? 'Full Newspaper' : pageNum}</p>
+                <p><strong>File:</strong> {fileInfo.name || (fileInfo.file ? fileInfo.file.name : '')}</p>
+              </div>
+
+              <div className="preview-content" style={{ alignItems: isPDF ? 'flex-start' : 'center', minHeight: 'auto' }}>
+                {isPDF ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
+                    <div className="pdf-preview" style={{ overflow: 'auto', backgroundColor: '#f1f5f9' }}>
+                      {previewUrl.startsWith('blob:') || previewUrl.startsWith('data:') ? (
+                        <CanvasPDFViewer url={previewUrl} />
+                      ) : (
+                        <iframe
+                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`}
+                          title="PDF Preview"
+                          style={{ width: '100%', height: '100%', border: 'none' }}
+                        />
+                      )}
+                    </div>
+                    <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                      📄 PDF Document Preview.
+                    </p>
+                  </div>
+                ) : isImage ? (
+                  <div className="image-preview">
+                    <img
+                      src={previewUrl}
+                      alt={`Page ${pageNum} preview`}
+                      style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                    />
+                    <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                      🖼️ Image Preview.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="unsupported-preview">
+                    <p>Preview not available for this file type.</p>
+                    <p>File: {fileInfo.name}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="preview-actions">
+                <button
+                  className="cancel-button"
+                  onClick={cancelPreview}
+                  disabled={isUploading || isNotifying}
+                >
+                  ❌ Close
+                </button>
+                {fileInfo.file && fileInfo.status === 'selected' && (
+                  <button
+                    className="confirm-button"
+                    onClick={confirmUpload}
+                    disabled={isUploading || isNotifying}
+                  >
+                    {isUploading ? 'Uploading...' : isNotifying ? 'Notifying...' : '✅ Confirm & Send for Review'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

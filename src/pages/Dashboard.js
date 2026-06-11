@@ -500,7 +500,7 @@ const generateAndDownloadPdf = async (newspaper, date, edition) => {
           <h3>{formatDisplayDate(selectedDate)}</h3>
           {newspapers.map(newspaper => (
             <div key={newspaper} className="newspaper-section" style={{ marginBottom: '40px' }}>
-              <h3 style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '10px' }}>📰 {newspaper}</h3>
+              <h3 style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '10px' }}>📰 {newspaper === 'Nirnayak' ? 'Dainik Nirnayak' : newspaper}</h3>
               <div className="editions-container" style={{ marginTop: '20px' }}>
                 {getEditionsForNewspaper(newspaper).map(edition => {
                   const allAccepted = areAllPagesAccepted(newspaper, selectedDate, edition);
@@ -511,7 +511,7 @@ const generateAndDownloadPdf = async (newspaper, date, edition) => {
                   return (
                     <div key={edition} className="edition-pages">
                       <div className="edition-header">
-                        <h4>{edition} Edition</h4>
+                        <h4>{newspaper === 'Nirnayak' ? 'Dainik Nirnayak' : newspaper} - {edition} Edition</h4>
                         <div className="edition-actions">
                           <button
                             className={`download-all-button ${allAccepted ? 'active' : 'disabled'}`}
@@ -737,7 +737,7 @@ const generateAndDownloadPdf = async (newspaper, date, edition) => {
                 )}
               </div>
               <div className="upload-details">
-                <p><strong>{page.edition}</strong> - Page {page.pageNumber}</p>
+                <p><strong>{page.newspaper === 'Nirnayak' || !page.newspaper ? 'Dainik Nirnayak' : page.newspaper} ({page.edition})</strong> - Page {page.pageNumber}</p>
                 <p>{formatDisplayDate(page.date)}</p>
                 <p className="upload-time">
                   Uploaded {new Date(page.timestamp).toLocaleTimeString()}

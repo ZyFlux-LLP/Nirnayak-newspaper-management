@@ -104,9 +104,18 @@ const Review = () => {
         pagesStatus[num] = { exists: false, status: null };
       });
 
+      const currentNewspaper = currentPage.newspaper || 'Nirnayak';
+
       // Fill in the data from the query results
       pagesSnapshot.forEach(doc => {
         const pageData = doc.data();
+        const docNewspaper = pageData.newspaper || 'Nirnayak';
+        
+        // Filter out other newspapers' pages (e.g. Shikhar Sanket)
+        if (docNewspaper !== currentNewspaper) {
+          return;
+        }
+
         const pageNum = parseInt(pageData.pageNumber);
         if (pagesStatus[pageNum]) {
           pagesStatus[pageNum] = {

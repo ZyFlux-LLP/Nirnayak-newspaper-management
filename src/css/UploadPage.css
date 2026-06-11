@@ -263,7 +263,8 @@
   overflow: hidden;
 }
 
-.pdf-preview embed {
+.pdf-preview embed,
+.pdf-preview iframe {
   border: none;
   border-radius: 4px;
 }
